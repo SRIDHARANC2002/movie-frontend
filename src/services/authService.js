@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-//const API_URL = 'http://localhost:5005/api/users';
-const API_URL = "https://movie-backend-4-nwi2.onrender.com/api/users";
+const API_URL = 'http://localhost:5005/api/users';
+//const API_URL = "https://movie-backend-4-nwi2.onrender.com/api/users";
 
 export const authService = {
     register: async (userData) => {
