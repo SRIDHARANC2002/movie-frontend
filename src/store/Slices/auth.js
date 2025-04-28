@@ -122,6 +122,9 @@ const authSlice = createSlice({
           ...action.payload
         };
       }
+    },
+    clearError: (state) => {
+      state.error = null;
     }
   },
   extraReducers: (builder) => {
@@ -138,7 +141,12 @@ const authSlice = createSlice({
       })
       .addCase(register.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        // Convert Error object to string to avoid React rendering issues
+        state.error = action.payload instanceof Error
+          ? action.payload.message
+          : typeof action.payload === 'object' && action.payload !== null
+            ? JSON.stringify(action.payload)
+            : String(action.payload);
         console.error('❌ Registration failed:', action.payload);
       })
       // Login
@@ -154,7 +162,13 @@ const authSlice = createSlice({
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        // Convert Error object to string to avoid React rendering issues
+        state.error = action.payload instanceof Error
+          ? action.payload.message
+          : typeof action.payload === 'object' && action.payload !== null
+            ? JSON.stringify(action.payload)
+            : String(action.payload);
+        console.error('❌ Login failed:', action.payload);
       })
       // Update User Details
       .addCase(updateUserDetailsAsync.pending, (state) => {
@@ -169,11 +183,16 @@ const authSlice = createSlice({
       })
       .addCase(updateUserDetailsAsync.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        // Convert Error object to string to avoid React rendering issues
+        state.error = action.payload instanceof Error
+          ? action.payload.message
+          : typeof action.payload === 'object' && action.payload !== null
+            ? JSON.stringify(action.payload)
+            : String(action.payload);
         console.error('❌ User details update failed:', action.payload);
       });
   }
 });
 
-export const { logout, updateUserDetails } = authSlice.actions;
+export const { logout, updateUserDetails, clearError } = authSlice.actions;
 export default authSlice.reducer;

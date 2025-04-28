@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { login } from "../../store/Slices/auth";
+import { login, clearError } from "../../store/Slices/auth";
 import "../Styles/Auth.css";
 
 export default function Login() {
@@ -9,7 +9,8 @@ export default function Login() {
     email: "",
     password: "",
   });
-  
+  const [localError, setLocalError] = useState('');
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading, error: authError } = useSelector((state) => state.auth);
@@ -20,10 +21,20 @@ export default function Login() {
       ...prev,
       [name]: value,
     }));
+
+    // Clear error messages when user starts typing
+    if (localError) setLocalError('');
+
+    // Also clear Redux error state
+    if (authError) dispatch(clearError());
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Clear any existing errors
+    setLocalError('');
+    if (authError) dispatch(clearError());
 
     try {
       const result = await dispatch(login(formData)).unwrap();
@@ -32,6 +43,14 @@ export default function Login() {
       }
     } catch (error) {
       console.error('Login failed:', error);
+      // Convert Error object to string for display
+      const errorMessage = error instanceof Error
+        ? error.message
+        : typeof error === 'object' && error !== null
+          ? JSON.stringify(error)
+          : String(error);
+      // Set a local error state for display
+      setLocalError(errorMessage);
     }
   };
 
@@ -39,7 +58,11 @@ export default function Login() {
     <div className="auth-container">
       <div className="auth-card">
         <h2>Welcome Back</h2>
-        {authError && <div className="auth-error">{authError}</div>}
+        {(localError || authError) && (
+          <div className="auth-error">
+            {localError || authError}
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
             <label htmlFor="email">Email</label>

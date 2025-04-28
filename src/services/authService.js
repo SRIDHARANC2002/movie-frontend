@@ -22,8 +22,19 @@ export const authService = {
                 status: error.response?.status,
                 data: error.response?.data
             });
-            // Use Error object instead of string literal to fix ESLint warning
-            throw new Error(error.response?.data?.message || 'Registration failed');
+
+            // Get the status code and error message
+            const statusCode = error.response?.status;
+            const errorMessage = error.response?.data?.message;
+
+            // Provide more specific error messages based on status code
+            if (statusCode === 409) {
+                throw new Error('Email already registered. Please use a different email or login.');
+            } else if (errorMessage) {
+                throw new Error(errorMessage);
+            } else {
+                throw new Error('Registration failed. Please try again later.');
+            }
         }
     },
 
@@ -61,8 +72,21 @@ export const authService = {
             return response.data;
         } catch (error) {
             console.error('❌ Login error:', error.response?.data);
-            // Use Error object instead of string literal to fix ESLint warning
-            throw new Error(error.response?.data?.message || 'Login failed');
+
+            // Get the status code and error message
+            const statusCode = error.response?.status;
+            const errorMessage = error.response?.data?.message;
+
+            // Provide more specific error messages based on status code
+            if (statusCode === 404) {
+                throw new Error('User not registered. Please create an account first.');
+            } else if (statusCode === 401) {
+                throw new Error('Invalid email or password. Please try again.');
+            } else if (errorMessage) {
+                throw new Error(errorMessage);
+            } else {
+                throw new Error('Login failed. Please try again later.');
+            }
         }
     },
 

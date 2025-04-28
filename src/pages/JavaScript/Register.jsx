@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { register } from "../../store/Slices/auth";
+import { register, clearError } from "../../store/Slices/auth";
 import "../Styles/Auth.css";
 
 export default function Register() {
@@ -11,11 +11,11 @@ export default function Register() {
     password: "",
     confirmPassword: "",
   });
-  
+
   const [validationError, setValidationError] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  
+
   const { loading, error } = useSelector((state) => state.auth);
 
   const handleChange = (e) => {
@@ -24,12 +24,22 @@ export default function Register() {
       ...prev,
       [name]: value,
     }));
+
+    // Clear validation errors when user starts typing
     setValidationError("");
+
+    // Also dispatch an action to clear the Redux error state
+    if (error) {
+      dispatch(clearError());
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setValidationError("");
+
+    // Clear any existing Redux errors
+    if (error) dispatch(clearError());
 
     console.log('📝 Form Data:', {
       ...formData,
@@ -54,7 +64,13 @@ export default function Register() {
       navigate("/login");
     } catch (err) {
       console.error('❌ Registration error:', err);
-      setValidationError(err.toString());
+      // Convert Error object to string for display
+      const errorMessage = err instanceof Error
+        ? err.message
+        : typeof err === 'object' && err !== null
+          ? JSON.stringify(err)
+          : String(err);
+      setValidationError(errorMessage);
     }
   };
 
@@ -62,8 +78,11 @@ export default function Register() {
     <div className="auth-container">
       <div className="auth-card">
         <h2>Create Account</h2>
-        {validationError && <div className="auth-error">{validationError}</div>}
-        {error && <div className="auth-error">{error}</div>}
+        {(validationError || error) && (
+          <div className="auth-error">
+            {validationError || error}
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
             <label htmlFor="fullName">Full Name</label>
