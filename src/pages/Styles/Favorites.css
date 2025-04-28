@@ -1,0 +1,74 @@
+.favorites-container {
+  padding: 2rem;
+  min-height: 100vh;
+  background: #141414;
+}
+
+.favorites-container h1 {
+  color: white;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  font-weight: 600;
+  position: relative;
+  padding-bottom: 1rem;
+}
+
+.favorites-container h1::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 60px;
+  height: 4px;
+  background: #e50914;
+  border-radius: 2px;
+}
+
+.favorites-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 2rem;
+}
+
+.favorites-empty {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #141414;
+  padding: 2rem;
+}
+
+.empty-content {
+  text-align: center;
+  color: white;
+  max-width: 400px;
+}
+
+.empty-content .heart-icon {
+  width: 64px;
+  height: 64px;
+  fill: #e50914;
+  margin-bottom: 1.5rem;
+}
+
+.empty-content h2 {
+  font-size: 1.75rem;
+  margin-bottom: 1rem;
+}
+
+.empty-content p {
+  color: #ccc;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .favorites-container {
+    padding: 1rem;
+  }
+
+  .favorites-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+}

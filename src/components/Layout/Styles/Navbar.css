@@ -1,0 +1,210 @@
+/* General styles for the navbar */
+.container-fluid {
+  background-color: rgb(124, 124, 224);
+}
+
+.navbar {
+  padding: 1rem 0;
+  background-color: rgba(0, 0, 0, 0.9) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  font-family: cursive;
+}
+
+/* Brand title styling with animation */
+.navbar-brand {
+  font-size: 1.5rem;
+  font-weight: 700;
+  animation: multicolor 1s infinite;
+  transition: color 0.3s ease;
+}
+
+.navbar-brand:hover {
+  color: #06f426 !important;
+}
+
+/* Navigation links */
+.nav-link {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #fff !important;
+  padding: 0.5rem 1rem !important;
+  transition: color 0.3s ease;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nav-link:hover {
+  color: #e50914 !important;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: #e50914;
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.nav-link:hover::after {
+  width: 80%;
+}
+
+/* Register button styling */
+.register-link {
+  background: #f50505;
+  border-radius: 20px;
+  padding: 0.5rem 1.5rem !important;
+  margin-left: 0.5rem;
+  color: #fff !important;
+  text-align: center;
+}
+
+.register-link:hover {
+  background: #f40612;
+  color: #fff !important;
+}
+
+.register-link::after {
+  display: none;
+}
+
+/* Favorites link with icon */
+.favorites-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.favorites-link .heart-icon {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+  transition: transform 0.3s ease;
+}
+
+.favorites-link:hover .heart-icon {
+  transform: scale(1.1);
+}
+
+.favorites-count {
+  background: #e50914;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-left: 0.25rem;
+}
+
+/* Navbar toggler */
+.navbar-toggler {
+  border: none;
+  padding: 0.5rem;
+}
+
+.navbar-toggler:focus {
+  box-shadow: none;
+  outline: none;
+}
+
+.navbar-toggler-icon {
+  width: 1.5em;
+  height: 1.5em;
+}
+
+/* Multicolor text animation */
+@keyframes multicolor {
+  0% { color: red; }
+  20% { color: orange; }
+  40% { color: yellow; }
+  60% { color: green; }
+  80% { color: blue; }
+  100% { color: violet; }
+}
+
+/* Specific styling for the animated brand text */
+.multicolor-text {
+  font-size: 1.5rem;
+  animation: multicolor 1s infinite;
+}
+
+/* User profile and logout section */
+.user-profile-link {
+  display: flex;
+  align-items: center;
+  color: rgba(255,255,255,0.7);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.user-profile-link:hover {
+  color: white;
+}
+
+.user-profile-link .fa-user {
+  margin-right: 8px;
+  opacity: 0.8;
+}
+
+/* Logout button styling */
+.btn-outline-light {
+  display: flex;
+  align-items: center;
+  border-color: rgba(255,255,255,0.5);
+  color: rgba(255,255,255,0.7);
+  transition: all 0.3s ease;
+}
+
+.btn-outline-light:hover {
+  background-color: rgba(255,255,255,0.1);
+  border-color: white;
+  color: white;
+}
+
+.btn-outline-light .fa-sign-out-alt {
+  margin-right: 8px;
+  opacity: 0.8;
+}
+
+/* Responsive adjustments */
+@media (max-width: 991.98px) {
+  .navbar-nav {
+    padding: 1rem 0;
+  }
+
+  .nav-link {
+    padding: 0.5rem 0 !important;
+  }
+
+  .register-link {
+    margin: 0.5rem 0;
+    text-align: center;
+  }
+
+  .favorites-link {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 992px) {
+  .user-profile-link,
+  .btn-outline-light {
+    width: 100%;
+    justify-content: center;
+    margin: 10px 0;
+  }
+}

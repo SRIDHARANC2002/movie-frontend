@@ -1,0 +1,119 @@
+.genre-filter {
+    margin: 20px 0;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.genre-title {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.genre-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.genre-button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 20px;
+    background-color: #e9ecef;
+    color: #495057;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.genre-button:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.genre-button.active {
+    background-color: #007bff;
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+.genre-section {
+    margin-top: 10px;
+}
+
+.genre-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.genre-group.primary {
+    margin-bottom: 15px;
+}
+
+.genre-group.primary .genre-button {
+    background-color: #e3f2fd;
+    color: #1976d2;
+    font-weight: 500;
+}
+
+.genre-group.primary .genre-button:hover,
+.genre-group.primary .genre-button.active {
+    background-color: #1976d2;
+    color: white;
+}
+
+.genre-group.secondary .genre-button {
+    background-color: #f5f5f5;
+    color: #616161;
+}
+
+.genre-group.secondary .genre-button:hover,
+.genre-group.secondary .genre-button.active {
+    background-color: #616161;
+    color: white;
+}
+
+.genre-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.genre-button.active {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.selected-genres {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #dee2e6;
+}
+
+.selected-genres p {
+    color: #495057;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.genre-filter-loading {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .genre-buttons {
+        gap: 8px;
+    }
+    
+    .genre-button {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+    
+    .genre-group {
+        gap: 8px;
+    }
+}
