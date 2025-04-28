@@ -1,7 +1,7 @@
 import axios from 'axios';
 
  //const API_URL = 'http://localhost:5005/api/favorites';
-const API_URL = "https://movie-backend-4-nwi2.onrender.com/api/favorites";
+const API_URL = "https://movie-backend-4-qrw2.onrender.com/api/favorites";
 
 export const favoriteService = {
   // Get all favorites for the current user
