@@ -107,7 +107,21 @@ export default function Navbar() {
           {isAuthenticated && (
             <div className="navbar-nav">
               <Link to="/user" className="nav-link d-flex align-items-center me-3">
-                <FontAwesomeIcon icon={faUser} className="me-2" />
+                {user?.profilePicture ? (
+                  <img
+                    src={user.profilePicture}
+                    alt="Profile"
+                    className="profile-pic me-2"
+                    style={{
+                      width: "32px",
+                      height: "32px",
+                      borderRadius: "50%",
+                      objectFit: "cover"
+                    }}
+                  />
+                ) : (
+                  <FontAwesomeIcon icon={faUser} className="me-2" />
+                )}
                 {getDisplayName()}
               </Link>
               <button

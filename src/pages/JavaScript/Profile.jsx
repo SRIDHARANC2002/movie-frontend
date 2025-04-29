@@ -1,19 +1,20 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faUser,
-  faEdit,
-  faSave,
-  faTimes
-} from '@fortawesome/free-solid-svg-icons';
+import { faUser, faEdit, faSave, faTimes, faCamera, faUpload } from '@fortawesome/free-solid-svg-icons';
 import { updateUserDetails, updateUserDetailsAsync } from '../../store/Slices/auth';
+import { authService, BACKEND_URL } from '../../services/authService';
+import '../Styles/Profile.css';
 
 export default function Profile() {
   const dispatch = useDispatch();
   const { user, loading, error } = useSelector((state) => state.auth);
   const [isEditing, setIsEditing] = useState(false);
   const [saveStatus, setSaveStatus] = useState({ success: false, message: '' });
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState('');
+  const fileInputRef = useRef(null);
+
   // Parse date of birth into day, month, year if available
   const parseDateOfBirth = (dateString) => {
     if (!dateString) return { day: '', month: '', year: '' };
@@ -59,7 +60,67 @@ export default function Profile() {
       address: user?.address || '',
       username: user?.username || ''
     });
+
+    // Get profile picture from user data
+    if (user?.profilePicture) {
+      // Cloudinary URL is already a full URL, no need to modify
+      setPreviewUrl(user.profilePicture);
+      console.log('🖼️ Setting profile picture URL:', user.profilePicture);
+    }
   }, [user]);
+
+  // Handle file selection
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+
+      // Create a preview URL
+      const fileReader = new FileReader();
+      fileReader.onload = () => {
+        setPreviewUrl(fileReader.result);
+      };
+      fileReader.readAsDataURL(file);
+    }
+  };
+
+  // Handle profile picture upload
+  const handleProfilePictureUpload = async () => {
+    if (!selectedFile) {
+      setSaveStatus({
+        success: false,
+        message: 'Please select an image to upload'
+      });
+      return;
+    }
+
+    try {
+      setSaveStatus({ success: false, message: 'Uploading profile picture to Cloudinary...' });
+      
+      const result = await authService.uploadProfilePicture(selectedFile);
+      
+      if (result.user?.profilePicture) {
+        setPreviewUrl(result.user.profilePicture);
+        dispatch(updateUserDetails({ profilePicture: result.user.profilePicture }));
+      }
+
+      setSaveStatus({
+        success: true,
+        message: 'Profile picture uploaded to Cloudinary successfully!'
+      });
+
+      setSelectedFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (error) {
+      console.error('Failed to upload profile picture:', error);
+      setSaveStatus({
+        success: false,
+        message: `Failed to upload profile picture: ${error.message}`
+      });
+    }
+  };
 
   // Indian Phone Number Formatting Function
   const formatIndianPhoneNumber = (phoneNumber) => {
@@ -80,8 +141,6 @@ export default function Profile() {
     // Return standard 10-digit format without formatting
     return trimmed;
   };
-
-  // Removed unused formatPhoneNumber function
 
   // Date of Birth validation function
   // eslint-disable-next-line no-unused-vars
@@ -146,8 +205,6 @@ export default function Profile() {
       end: 0
     });
     const [isComposing, setIsComposing] = useState(false);
-    // eslint-disable-next-line no-unused-vars
-    const cursorPosition = useCursorTracking(inputRef);
 
     useEffect(() => {
       setInputValue(value || '');
@@ -207,44 +264,40 @@ export default function Profile() {
       const input = e.target;
       const { name, value } = input;
 
-      // Enhanced key handling
       switch (e.key) {
         case 'Backspace':
-        case 'Delete':
-          // Ensure cursor moves to end after deletion
+        case 'Delete': {
           requestAnimationFrame(() => {
             const processedValue = name === 'phone'
-                ? value.replace(/\D/g, '').slice(0, 10)
-                : value;
+              ? value.replace(/\D/g, '').slice(0, 10)
+              : value;
 
             const inputElement = document.getElementsByName(name)[0];
             if (inputElement) {
-              const newCursorPosition = processedValue.length;
               inputElement.setSelectionRange(
-                newCursorPosition,
-                newCursorPosition
+                processedValue.length,
+                processedValue.length
               );
 
-              // Update display with formatted number
               if (name === 'phone') {
                 inputElement.value = formatIndianPhoneNumber(processedValue);
               }
             }
           });
-          return;
-
+          break;
+        }
         case 'ArrowLeft':
-        case 'ArrowRight':
-          // Preserve cursor movement
-          return;
-
-        default:
-          // Phone number specific validation
+        case 'ArrowRight': {
+          break;
+        }
+        default: {
           if (name === 'phone') {
             if (!/^[0-9]$/.test(e.key)) {
               e.preventDefault();
             }
           }
+          break;
+        }
       }
     };
 
@@ -362,38 +415,10 @@ export default function Profile() {
     });
   };
 
-  const useCursorTracking = (inputRef) => {
-    // Using a ref instead of state to avoid unused variable warning
-    const cursorPositionRef = useRef(0);
-
-    const handleCursorChange = useCallback(() => {
-      if (inputRef.current) {
-        cursorPositionRef.current = inputRef.current.selectionStart;
-      }
-    }, [inputRef]);
-
-    useEffect(() => {
-      const currentInput = inputRef.current;
-      if (currentInput) {
-        currentInput.addEventListener('select', handleCursorChange);
-        currentInput.addEventListener('keyup', handleCursorChange);
-        currentInput.addEventListener('mouseup', handleCursorChange);
-
-        return () => {
-          currentInput.removeEventListener('select', handleCursorChange);
-          currentInput.removeEventListener('keyup', handleCursorChange);
-          currentInput.removeEventListener('mouseup', handleCursorChange);
-        };
-      }
-    }, [inputRef, handleCursorChange]);
-
-    return cursorPositionRef.current;
-  };
-
   const handleSave = async () => {
     try {
       // Clear any previous status messages
-      setSaveStatus({ success: false, message: '' });
+      setSaveStatus({ success: false, message: 'Saving changes...' });
 
       // Validate date of birth if any of the fields are provided
       if ((editedUser.day || editedUser.month || editedUser.year) &&
@@ -412,12 +437,26 @@ export default function Profile() {
       const result = await dispatch(updateUserDetailsAsync(editedUser)).unwrap();
 
       // Show success message
+      let successMessage = 'Profile updated successfully!';
+
+      // Check if it was a local-only update
+      if (result.message && result.message.includes('local only')) {
+        successMessage = 'Profile updated successfully! (Changes stored locally)';
+      } else {
+        successMessage = 'Profile updated successfully! Your details have been saved to the database.';
+      }
+
       setSaveStatus({
         success: true,
-        message: 'Profile updated successfully! Your details have been saved to the database.'
+        message: successMessage
       });
 
       console.log('✅ Profile updated successfully:', result);
+
+      // Log the profile picture path if available
+      if (result.user && result.user.profilePicture) {
+        console.log('📸 Profile picture path in database:', result.user.profilePicture);
+      }
 
       // Close the editing mode after a short delay to show the success message
       setTimeout(() => {
@@ -427,11 +466,20 @@ export default function Profile() {
       }, 2000);
     } catch (error) {
       console.error('Failed to update user details:', error);
-      // Show error message
-      setSaveStatus({
-        success: false,
-        message: `Failed to update profile: ${error}`
-      });
+
+      // Show error message with login prompt if it's an authentication error
+      if (error.message && error.message.includes('Authentication failed')) {
+        setSaveStatus({
+          success: false,
+          message: `${error.message} Please try logging out and logging back in.`
+        });
+      } else {
+        // Show generic error message
+        setSaveStatus({
+          success: false,
+          message: `Failed to update profile: ${error}`
+        });
+      }
     }
   };
 
@@ -533,16 +581,62 @@ export default function Profile() {
               {user ? (
                 <div className="row">
                   <div className="col-md-4 text-center">
-                    <FontAwesomeIcon
-                      icon={faUser}
-                      className="mb-4"
-                      style={{
-                        fontSize: '8rem',
-                        color: '#6c757d'
-                      }}
-                    />
-                    <h3 className="mb-2">{user.name}</h3>
-                    <p className="text-muted">{user.email}</p>
+                    <div className="profile-picture-container">
+                      {previewUrl ? (
+                        <img
+                          src={previewUrl}
+                          alt="Profile"
+                          className="profile-picture"
+                        />
+                      ) : (
+                        <div className="profile-picture-placeholder">
+                          <FontAwesomeIcon
+                            icon={faUser}
+                            style={{
+                              fontSize: '5rem',
+                              color: '#6c757d'
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                    {isEditing && (
+                      <div className="profile-image-actions">
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          onChange={handleFileChange}
+                          accept="image/*"
+                          className="d-none"
+                          id="profile-picture-input"
+                        />
+                        <label
+                          htmlFor="profile-picture-input"
+                          className="btn btn-outline-primary btn-sm mb-2"
+                        >
+                          <FontAwesomeIcon icon={faCamera} className="me-1" />
+                          Select Image
+                        </label>
+                        {selectedFile && (
+                          <button
+                            className="btn btn-primary btn-sm"
+                            onClick={handleProfilePictureUpload}
+                            disabled={loading}
+                          >
+                            {loading ? (
+                              <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                            ) : (
+                              <FontAwesomeIcon icon={faUpload} className="me-1" />
+                            )}
+                            Set as Profile Picture
+                          </button>
+                        )}
+                      </div>
+                    )}
+                    <div className="profile-info mt-4">
+                      <h3 className="mb-2">{user.name}</h3>
+                      <p className="text-muted">{user.email}</p>
+                    </div>
                   </div>
                   <div className="col-md-8">
                     {isEditing ? (
@@ -691,14 +785,22 @@ export default function Profile() {
                 </div>
               ) : (
                 <div className="text-center">
-                  <FontAwesomeIcon
-                    icon={faUser}
-                    className="mb-4"
-                    style={{
-                      fontSize: '5rem',
-                      color: '#6c757d'
-                    }}
-                  />
+                  <div className="rounded-circle mx-auto mb-4" style={{
+                    width: '150px',
+                    height: '150px',
+                    backgroundColor: '#f8f9fa',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <FontAwesomeIcon
+                      icon={faUser}
+                      style={{
+                        fontSize: '5rem',
+                        color: '#6c757d'
+                      }}
+                    />
+                  </div>
                   <p className="text-muted">No user logged in</p>
                 </div>
               )}

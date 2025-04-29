@@ -180,6 +180,20 @@
   opacity: 0.8;
 }
 
+/* Profile picture styling */
+.profile-pic {
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.profile-pic:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.nav-link:hover .profile-pic {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
 /* Responsive adjustments */
 @media (max-width: 991.98px) {
   .navbar-nav {

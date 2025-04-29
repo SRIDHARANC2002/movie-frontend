@@ -1,7 +1,47 @@
 import axios from 'axios';
+// const API_URL = "http://localhost:5005/api/users";
+ const API_URL = "https://movie-backend-4-qrw2.onrender.com/api/users";
+ const BACKEND_URL = "https://movie-backend-4-qrw2.onrender.com";
+//const BACKEND_URL = "http://localhost:5005";
+//const API_URL = `${BACKEND_URL}/api/users`;
+//const API_URL = "http://localhost:5005/api/users";
+export 
+//const BACKEND_URL = "http://localhost:5005";
 
-//const API_URL = 'http://localhost:5005/api/users';
-const API_URL = "https://movie-backend-4-qrw2.onrender.com/api/users";
+const refreshAuthToken = async () => {
+  try {
+    const currentToken = localStorage.getItem('token');
+    if (!currentToken) {
+      throw new Error('No token found');
+    }
+
+    const response = await axios.post(`${API_URL}/refresh-token`, {}, {
+      headers: {
+        'Authorization': `Bearer ${currentToken}`
+      }
+    });
+
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+      // Also update user data in localStorage if provided
+      if (response.data.user) {
+        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        localStorage.setItem('user', JSON.stringify({
+          ...currentUser,
+          ...response.data.user
+        }));
+      }
+      return response.data.token;
+    }
+    throw new Error('No token received from refresh endpoint');
+  } catch (error) {
+    console.error('Token refresh failed:', error);
+    // Clear token and user data if refresh fails
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    throw new Error('Session expired. Please log in again.');
+  }
+};
 
 export const authService = {
     register: async (userData) => {
@@ -41,29 +81,42 @@ export const authService = {
     login: async (credentials) => {
         try {
             console.log('🔑 Attempting login...');
+
+            // Clear any existing tokens first
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+
             const response = await axios.post(`${API_URL}/login`, credentials);
 
             if (response.data.token) {
-                // Clear any existing tokens first
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-
-                // Store token in localStorage
-                const token = response.data.token.trim(); // Ensure no whitespace
-                localStorage.setItem('token', token);
-                console.log('🔑 Token stored in localStorage:', token.substring(0, 15) + '...');
-
-                // Also store user data in localStorage for persistence
-                const userData = response.data.user;
-                localStorage.setItem('user', JSON.stringify(userData));
-
-                console.log('✅ Login successful');
-                console.log('👤 User data stored in localStorage:', userData);
+                // Store token and user data in localStorage
+                localStorage.setItem('token', response.data.token);
+                localStorage.setItem('user', JSON.stringify(response.data.user));
+                
+                // Log the user data for debugging
+                console.log('👤 User data stored in localStorage:', response.data.user);
+                if (response.data.user.profilePicture) {
+                    console.log('🖼️ Profile picture URL:', response.data.user.profilePicture);
+                }
 
                 // Verify the token was stored correctly
                 const storedToken = localStorage.getItem('token');
-                if (storedToken !== token) {
+                if (storedToken !== response.data.token) {
                     console.warn('⚠️ Token storage verification failed!');
+                }
+
+                // Verify token with a test request
+                try {
+                    console.log('🔍 Verifying token with test request...');
+                    await axios.get(`${API_URL}/test`, {
+                        headers: {
+                            'Authorization': `Bearer ${response.data.token}`
+                        }
+                    });
+                    console.log('✅ Token verification successful');
+                } catch (verifyError) {
+                    console.warn('⚠️ Token verification failed:', verifyError.message);
+                    // We'll continue anyway since we have the token
                 }
             } else {
                 console.warn('⚠️ No token received from server!');
@@ -101,53 +154,157 @@ export const authService = {
     updateUserDetails: async (userData) => {
         try {
             console.log('🔄 Updating user details...');
+            console.log('📊 User data to update:', userData);
 
             // Get token from localStorage
-            const token = localStorage.getItem('token');
-            console.log('🔑 Token from localStorage:', token ? `${token.substring(0, 15)}...` : 'No token');
-
+            let token = localStorage.getItem('token');
             if (!token) {
-                console.log('❌ No token found, user must be logged in');
-                // Use Error object instead of string literal to fix ESLint warning
                 throw new Error('User must be logged in to update details');
             }
 
-            // Ensure token is properly formatted
-            const authHeader = `Bearer ${token.trim()}`;
-            console.log('📝 Authorization header:', `${authHeader.substring(0, 20)}...`);
+            // Create a copy of userData to send to the server
+            const dataToSend = { ...userData };
 
-            // Get user data from localStorage for debugging
-            const storedUser = JSON.parse(localStorage.getItem('user'));
-            console.log('👤 User data from localStorage:', storedUser);
+            try {
+                const response = await axios.put(
+                    `${API_URL}/update`,
+                    dataToSend,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                );
 
-            const response = await axios.put(
-                `${API_URL}/update`,
-                userData,
-                {
-                    headers: {
-                        'Authorization': authHeader,
-                        'Content-Type': 'application/json'
+                console.log('✅ User details updated successfully on server:', response.data);
+
+                // Update user data in localStorage
+                if (response.data.user) {
+                    localStorage.setItem('user', JSON.stringify(response.data.user));
+                    console.log('👤 Updated user data stored in localStorage:', response.data.user);
+                }
+
+                return response.data;
+            } catch (serverError) {
+                if (serverError.response?.status === 401) {
+                    try {
+                        // Try to refresh the token
+                        token = await refreshAuthToken();
+                        
+                        // Retry the update with the new token
+                        const response = await axios.put(
+                            `${API_URL}/update`,
+                            dataToSend,
+                            {
+                                headers: {
+                                    'Authorization': `Bearer ${token}`,
+                                    'Content-Type': 'application/json'
+                                }
+                            }
+                        );
+                        
+                        return response.data;
+                    } catch (refreshError) {
+                        console.error('Token refresh failed:', refreshError);
+                        throw new Error('Session expired. Please log in again.');
                     }
                 }
-            );
+                throw serverError;
+            }
+        } catch (error) {
+            console.error('❌ Update user details error:', error);
+            if (error.response?.status === 401) {
+                throw new Error('Session expired. Please log in again.');
+            } else if (error.response?.data?.message) {
+                throw new Error(error.response.data.message);
+            } else if (error.message) {
+                throw new Error(error.message);
+            } else {
+                throw new Error('Failed to update user details. Please try again.');
+            }
+        }
+    },
 
-            console.log('✅ User details updated successfully:', response.data);
-
-            // Update user data in localStorage
-            if (response.data.user) {
-                localStorage.setItem('user', JSON.stringify(response.data.user));
-                console.log('👤 Updated user data stored in localStorage:', response.data.user);
+    uploadProfilePicture: async (file) => {
+        try {
+            console.log('📸 Uploading profile picture...');
+            
+            // Get current token
+            let token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No authentication token found');
             }
 
-            return response.data;
+            // Create form data
+            const formData = new FormData();
+            formData.append('profilePicture', file);
+
+            try {
+                const response = await axios.post(
+                    `${API_URL}/profile-picture`,
+                    formData,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    }
+                );
+
+                if (response.data.user && response.data.user.profilePicture) {
+                    // Update local storage with new profile picture
+                    const userData = JSON.parse(localStorage.getItem('user') || '{}');
+                    userData.profilePicture = response.data.user.profilePicture;
+                    localStorage.setItem('user', JSON.stringify(userData));
+                    
+                    console.log('🖼️ Profile picture URL:', response.data.user.profilePicture);
+                    return response.data;
+                }
+            } catch (error) {
+                if (error.response?.status === 401) {
+                    try {
+                        // Try to refresh the token
+                        token = await refreshAuthToken();
+                        
+                        // Retry upload with new token
+                        const response = await axios.post(
+                            `${API_URL}/profile-picture`,
+                            formData,
+                            {
+                                headers: {
+                                    'Authorization': `Bearer ${token}`,
+                                    'Content-Type': 'multipart/form-data'
+                                }
+                            }
+                        );
+                        
+                        if (response.data.user && response.data.user.profilePicture) {
+                            // Update local storage with new profile picture
+                            const userData = JSON.parse(localStorage.getItem('user') || '{}');
+                            userData.profilePicture = response.data.user.profilePicture;
+                            localStorage.setItem('user', JSON.stringify(userData));
+                            
+                            return response.data;
+                        }
+                    } catch (refreshError) {
+                        console.error('Token refresh failed:', refreshError);
+                        throw new Error('Session expired. Please log in again.');
+                    }
+                }
+                throw error;
+            }
         } catch (error) {
-            console.error('❌ Update user details error:', {
-                message: error.response?.data?.message || error.message,
-                status: error.response?.status,
-                data: error.response?.data
-            });
-            // Use Error object instead of string literal to fix ESLint warning
-            throw new Error(error.response?.data?.message || 'Failed to update user details');
+            console.error('❌ Profile picture update error:', error);
+            if (error.response?.status === 401) {
+                throw new Error('Session expired. Please log in again.');
+            } else if (error.response?.data?.message) {
+                throw new Error(error.response.data.message);
+            } else if (error.message) {
+                throw new Error(error.message);
+            } else {
+                throw new Error('Failed to upload profile picture. Please try again.');
+            }
         }
     }
 };
