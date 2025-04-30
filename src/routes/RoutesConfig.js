@@ -16,7 +16,7 @@ const Favorites = React.lazy(() => import("../pages/JavaScript/Favorites.jsx"));
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useSelector((state) => state.auth);
-  
+
   return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 

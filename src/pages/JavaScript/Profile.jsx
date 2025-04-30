@@ -95,7 +95,7 @@ export default function Profile() {
     }
 
     try {
-      setSaveStatus({ success: false, message: 'Uploading profile picture to Cloudinary...' });
+      setSaveStatus({ success: false, message: 'Uploading profile picture ...' });
       
       const result = await authService.uploadProfilePicture(selectedFile);
       
@@ -106,7 +106,7 @@ export default function Profile() {
 
       setSaveStatus({
         success: true,
-        message: 'Profile picture uploaded to Cloudinary successfully!'
+        message: 'Profile picture uploaded  successfully!'
       });
 
       setSelectedFile(null);
