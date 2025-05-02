@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { login, clearError } from "../../store/Slices/auth";
@@ -9,11 +9,19 @@ export default function Login() {
     email: "",
     password: "",
   });
-  const [localError, setLocalError] = useState('');
+  const [localError, setLocalError] = useState("");
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading, error: authError } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    // Add background class only on login page
+    document.body.classList.add("login-background");
+    return () => {
+      document.body.classList.remove("login-background");
+    };
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -22,18 +30,13 @@ export default function Login() {
       [name]: value,
     }));
 
-    // Clear error messages when user starts typing
-    if (localError) setLocalError('');
-
-    // Also clear Redux error state
+    if (localError) setLocalError("");
     if (authError) dispatch(clearError());
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Clear any existing errors
-    setLocalError('');
+    setLocalError("");
     if (authError) dispatch(clearError());
 
     try {
@@ -42,14 +45,12 @@ export default function Login() {
         navigate("/");
       }
     } catch (error) {
-      console.error('Login failed:', error);
-      // Convert Error object to string for display
-      const errorMessage = error instanceof Error
-        ? error.message
-        : typeof error === 'object' && error !== null
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : typeof error === "object" && error !== null
           ? JSON.stringify(error)
           : String(error);
-      // Set a local error state for display
       setLocalError(errorMessage);
     }
   };
@@ -59,13 +60,11 @@ export default function Login() {
       <div className="auth-card">
         <h2>Welcome Back</h2>
         {(localError || authError) && (
-          <div className="auth-error">
-            {localError || authError}
-          </div>
+          <div className="auth-error">{localError || authError}</div>
         )}
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email" style={{ fontWeight: 'bold' }}>Email</label>
             <input
               type="email"
               id="email"
@@ -78,7 +77,7 @@ export default function Login() {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password" style={{ fontWeight: 'bold' }}>Password</label>
             <input
               type="password"
               id="password"

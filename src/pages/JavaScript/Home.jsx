@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import MovieCardVertical from "../../components/Movies/JavaScript/MovieCardVertical";
-import SearchBox from "../../components/Movies/JavaScript/SearchBox";
 import GenreFilter from "../../components/Movies/JavaScript/GenreFilter";
 import Pagination from "../../components/Layout/JavaScript/Pagination";
 import axios from "axios";
@@ -22,7 +21,7 @@ export default function Home() {
       setIsLoading(true);
       try {
         let url = `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_original_language=ta&page=${currentPage}&sort_by=popularity.desc&region=IN`;
-        
+
         if (selectedGenre) {
           url += `&with_genres=${selectedGenre}`;
         }
@@ -44,7 +43,7 @@ export default function Home() {
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleGenreSelect = (genreId) => {
@@ -55,29 +54,35 @@ export default function Home() {
   return (
     <div className="home-container">
       <header className="header-section">
+        <video autoPlay loop muted playsInline className="background-video">
+          <source
+            src="https://cdn.pixabay.com/video/2020/11/07/55241-499527137_large.mp4"
+            type="video/mp4"
+          />
+          Your browser does not support the video tag.
+        </video>
+
         <div className="header-content">
           <h1 className="main-title">Tamil Movie</h1>
           <p className="subtitle">
             Discover the best of Tamil cinema. Explore now.
           </p>
-          <div className="search-wrapper">
-            <SearchBox />
-          </div>
+          {/* SearchBox removed */}
         </div>
       </header>
 
       <main className="main-content">
         <div className="container">
           <div className="genre-wrapper">
-            <GenreFilter 
-              selectedGenre={selectedGenre} 
+            <GenreFilter
+              selectedGenre={selectedGenre}
               onGenreSelect={handleGenreSelect}
             />
           </div>
 
           <div className="content-header">
             <h2 className="section-title">
-              {selectedGenre ? 'Genre Movies' : 'Popular Tamil Movies'}
+              {selectedGenre ? "Genre Movies" : "Popular Tamil Movies"}
             </h2>
           </div>
 
@@ -100,14 +105,14 @@ export default function Home() {
                   </div>
                 ))}
               </div>
-              
+
               {movies.length === 0 && (
                 <div className="no-results">
                   <h3>No movies found for this genre</h3>
                   <p>Try selecting a different genre or check back later.</p>
                 </div>
               )}
-              
+
               {totalPages > 1 && (
                 <div className="pagination-wrapper">
                   <Pagination

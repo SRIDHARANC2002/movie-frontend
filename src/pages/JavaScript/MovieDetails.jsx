@@ -58,11 +58,15 @@ export default function MovieDetails() {
         const videosResponse = await axios.get(
           `${BASE_URL}/movie/${id}/videos?api_key=${API_KEY}&language=en-US`
         );
+        console.log("Videos fetched for trailer:", videosResponse.data.results);
         const trailer = videosResponse.data.results.find(
-          (video) => video.type === "Trailer" && video.site === "YouTube"
+          (video) => (video.type === "Trailer" || video.type === "Teaser") && video.site === "YouTube"
         );
         if (trailer) {
           setTrailerKey(trailer.key);
+        } else {
+          setTrailerKey(null);
+          console.warn("No trailer or teaser found for this movie.");
         }
 
         setError(null);

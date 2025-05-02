@@ -9,7 +9,6 @@ import {
   faUserPlus,
   faSignOutAlt,
   faUser,
-  faBookmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { useSelector, useDispatch } from "react-redux";
 import { logoutAndClearFavorites } from "../../../store/Slices/auth";
@@ -22,11 +21,6 @@ export default function Navbar() {
   // Safely access favorites with fallback to empty array
   const favorites = useSelector((state) => {
     return state.favorites?.movies || [];
-  });
-
-  // Safely access watchlist with fallback to empty array
-  const watchlist = useSelector((state) => {
-    return state.watchList?.watchListValues || [];
   });
 
   const handleLogout = () => {
@@ -76,15 +70,6 @@ export default function Navbar() {
                     Favorites
                     {favorites.length > 0 && (
                       <span className="badge bg-danger ms-1">{favorites.length}</span>
-                    )}
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/watchlist">
-                    <FontAwesomeIcon icon={faBookmark} className="me-2" />
-                    Watchlist
-                    {watchlist.length > 0 && (
-                      <span className="badge bg-primary ms-1">{watchlist.length}</span>
                     )}
                   </Link>
                 </li>

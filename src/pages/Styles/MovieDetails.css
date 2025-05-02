@@ -209,7 +209,7 @@
   height: 24px;
   fill: currentColor;
 }
-
+/* 
 .favorite-button {
   background: rgba(255, 255, 255, 0.1);
   color: white;
@@ -227,10 +227,50 @@
 }
 
 .favorite-button .heart-icon {
-  width: 20px;
+  width: 25px;
   height: 20px;
   fill: currentColor;
   margin-right: 5px;
+} */
+
+.favorite-button-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.favorite-button {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  backdrop-filter: blur(5px);
+  margin-right: 10px;
+  max-width: 300px;          /* Limits the button width */
+  width: 100%;               /* Responsive */
+  padding: 12px 20px;        /* Controls inner size */
+  border-radius: 8px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.favorite-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.favorite-button.active {
+  background: #e50914;
+}
+
+.favorite-button .heart-icon {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+  margin-right: 8px;
 }
 
 /* Details Section */

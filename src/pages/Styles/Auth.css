@@ -1,25 +1,87 @@
+/* Apply background image to entire page
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+  background: 
+    linear-gradient(135deg, rgba(20, 20, 20, 0), rgba(43, 43, 43, 0)),
+    url('https://i0.wp.com/isaishop.com/wp-content/uploads/2022/05/Tamil-Great-Movies.jpg?fit=1920%2C1080&ssl=1') no-repeat center center / cover;
+  background-attachment: fixed;
+} */
+/* Background for Register Page
+body.register-page {
+  background: 
+    linear-gradient(135deg, rgba(20, 20, 20, 0), rgba(43, 43, 43, 0)),
+    url('https://wallpapers.com/images/featured/movie-9pvmdtvz4cb0xl37.jpg') no-repeat center center / cover;
+  background-attachment: fixed;
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+} */
+ /* Reset and base styles */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+}
+
+/* Only apply background on login page */
+body.login-background {
+  background: 
+    linear-gradient(135deg, rgba(20, 20, 20, 0), rgba(43, 43, 43, 0)),
+    url('https://i0.wp.com/isaishop.com/wp-content/uploads/2022/05/Tamil-Great-Movies.jpg?fit=1920%2C1080&ssl=1') no-repeat center center / cover;
+  background-attachment: fixed;
+}
+.register-video-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  min-width: 100%;
+  min-height: 100%;
+  object-fit: cover;
+  z-index: -1;
+}
+
+/* Container centered in viewport */
 .auth-container {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #141414 0%, #2b2b2b 100%);
   padding: 2rem;
 }
 
+/* Card-style form box */
 .auth-card {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0);
   backdrop-filter: blur(10px);
   border-radius: 16px;
   padding: 2.5rem;
   width: 100%;
   max-width: 400px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 32px rgba(230, 228, 228, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.auth-card h2 {
-  color: #fff;
+/* Register page specific card style */
+.register-page .auth-card {
+  background: rgba(16, 16, 16, 0); /* Lighter background for Register card */
+  border-radius: 16px;
+  padding: 2.5rem;
+  max-width: 450px;  /* Slightly wider for Register page */
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);  /* Stronger shadow */
+  border: 1px solid rgba(234, 8, 8, 0.2);  /* Lighter border */
+}
+body.login-background .auth-card h2 {
+  color: #ffffff;
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+body.register-page .auth-card h2 {
+  color: #000000;
   text-align: center;
   margin-bottom: 2rem;
   font-size: 2rem;
@@ -49,30 +111,44 @@
 }
 
 .form-group label {
-  color: #fff;
+  color: #00000ec7;
   font-size: 0.9rem;
   font-weight: 500;
 }
 
-.form-group input {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+body.login-background .form-group input {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #ffffff;
   border-radius: 8px;
   padding: 0.75rem 1rem;
-  color: #fff;
   font-size: 1rem;
   transition: all 0.3s ease;
 }
 
-.form-group input:focus {
-  outline: none;
-  border-color: #e50914;
-  background: rgba(255, 255, 255, 0.1);
+body.register-page .form-group input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #000000;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  transition: all 0.3s ease;
 }
 
-.form-group input::placeholder {
-  color: rgba(255, 255, 255, 0.5);
+body.register-page .form-group input::placeholder {
+  color: rgba(0, 0, 0, 0.6);
 }
+
+.form-group input:focus {
+  outline: none;
+  border-color: #130102;
+  background: rgba(239, 243, 8, 0.1);
+}
+.form-group input::placeholder {
+  color: rgba(118, 116, 116, 0.6); /* Pale gray */
+}
+
 
 .auth-button {
   background: #e50914;
@@ -88,7 +164,7 @@
 }
 
 .auth-button:hover {
-  background: #f40612;
+  background: #000000de;
   transform: translateY(-2px);
 }
 
