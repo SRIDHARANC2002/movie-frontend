@@ -72,7 +72,8 @@ export const favoriteService = {
           headers: {
             'Authorization': `Bearer ${token}`
           },
-          timeout: 5000 // Add timeout
+          timeout: 1500000  // 25 minutes in milliseconds
+
         });
 
         console.log('✅ Movie added to favorites successfully');
