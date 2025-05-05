@@ -38,6 +38,8 @@ export default function MovieDetails() {
   const isFavorite = favorites.some((m) => m?.id === Number(id));
 
   useEffect(() => {
+    window.scrollTo(0, 0); // Scroll to top when id changes
+
     const fetchMovieDetails = async () => {
       try {
         setLoading(true);
@@ -323,7 +325,7 @@ export default function MovieDetails() {
   if (loading) {
     return (
       <div className="loading-container">
-        <div className="spinner"></div>
+        <div className="dotted-spinner"></div>
       </div>
     );
   }

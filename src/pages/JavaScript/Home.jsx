@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import MovieCardVertical from "../../components/Movies/JavaScript/MovieCardVertical";
 import GenreFilter from "../../components/Movies/JavaScript/GenreFilter";
 import Pagination from "../../components/Layout/JavaScript/Pagination";
@@ -8,9 +9,21 @@ import "../Styles/Home.css";
 const API_KEY = "1f54bd990f1cdfb230adb312546d765d";
 const BASE_URL = "https://api.themoviedb.org/3";
 
+// Utility function to shuffle an array
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
 export default function Home() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialPage = parseInt(searchParams.get("page")) || 1;
+
   const [movies, setMovies] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(initialPage);
   const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -27,7 +40,8 @@ export default function Home() {
         }
 
         const response = await axios.get(url);
-        setMovies(response.data.results);
+        const shuffledMovies = shuffleArray(response.data.results.slice());
+        setMovies(shuffledMovies);
         setTotalPages(response.data.total_pages);
         setError(null);
       } catch (err) {
@@ -43,12 +57,14 @@ export default function Home() {
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
+    setSearchParams({ page: page.toString() });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleGenreSelect = (genreId) => {
     setSelectedGenre(genreId);
     setCurrentPage(1);
+    setSearchParams({ page: "1" });
   };
 
   return (
@@ -87,9 +103,9 @@ export default function Home() {
           </div>
 
           {isLoading ? (
-            <div className="loading-container">
-              <div className="spinner"></div>
-            </div>
+          <div className="loading-container">
+            <div className="dotted-spinner"></div>
+          </div>
           ) : error ? (
             <div className="error-message">
               <div className="alert alert-danger" role="alert">

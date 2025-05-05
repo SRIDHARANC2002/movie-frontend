@@ -42,6 +42,9 @@ export default function Search() {
   const suggestionsRef = useRef(null);
   const searchTimeoutRef = useRef(null);
 
+  // Cache for search results: { [query]: { [page]: { movies, totalPages } } }
+  const searchCache = useRef({});
+
   const fetchSuggestions = async (searchTerm) => {
     if (searchTerm.length < 1) {
       setSuggestions(POPULAR_SUGGESTIONS);
@@ -104,6 +107,16 @@ export default function Search() {
       setIsLoading(false);
       return;
     }
+
+    // Check cache first
+    if (searchCache.current[searchTerm] && searchCache.current[searchTerm][page]) {
+      const cached = searchCache.current[searchTerm][page];
+      setMovies(cached.movies);
+      setTotalPages(cached.totalPages);
+      setError(null);
+      setIsLoading(false);
+      return;
+    }
     
     setIsLoading(true);
     try {
@@ -133,6 +146,15 @@ export default function Search() {
       setMovies(combinedMovies);
       setTotalPages(Math.min(responses[0].data.total_pages, 10));
       setError(null);
+
+      // Store in cache
+      if (!searchCache.current[searchTerm]) {
+        searchCache.current[searchTerm] = {};
+      }
+      searchCache.current[searchTerm][page] = {
+        movies: combinedMovies,
+        totalPages: Math.min(responses[0].data.total_pages, 10)
+      };
     } catch (err) {
       setError("Failed to search movies. Please try different keywords.");
       console.error("Error searching movies:", err);
