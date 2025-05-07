@@ -33,7 +33,7 @@
   object-fit: cover;
   pointer-events: none;
   transform: scale(1.5);
-  opacity: 100; /* Adjust the value between 0 (fully transparent) and 1 (fully opaque) */
+  opacity: 1; /* Adjust the value between 0 (fully transparent) and 1 (fully opaque) */
 }
 
 .mute-toggle {

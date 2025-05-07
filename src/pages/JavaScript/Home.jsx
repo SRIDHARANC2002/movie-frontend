@@ -9,14 +9,7 @@ import "../Styles/Home.css";
 const API_KEY = "1f54bd990f1cdfb230adb312546d765d";
 const BASE_URL = "https://api.themoviedb.org/3";
 
-// Utility function to shuffle an array
-function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
+
 
 export default function Home() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -40,8 +33,8 @@ export default function Home() {
         }
 
         const response = await axios.get(url);
-        const shuffledMovies = shuffleArray(response.data.results.slice());
-        setMovies(shuffledMovies);
+        // Removed shuffling to keep movies order consistent on reload
+        setMovies(response.data.results);
         setTotalPages(response.data.total_pages);
         setError(null);
       } catch (err) {
