@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { addMovie } from "../../store/Slices/watchlist";
+import { PLACEHOLDER_POSTER, PLACEHOLDER_PROFILE } from "../../utils/placeholderImage";
 
 const API_KEY = "1f54bd990f1cdfb230adb312546d765d";
 const BASE_URL = "https://api.themoviedb.org/3";
@@ -15,38 +16,38 @@ export default function Details() {
   const [similarMovies, setSimilarMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.auth);
   const watchList = useSelector((state) => state.watchlist?.watchListValues);
 
   useEffect(() => {
     let isMounted = true;
-    
+
     const fetchMovieDetails = async () => {
       setLoading(true);
       setError(null);
-      
+
       try {
         // Fetch movie details
         const movieResponse = await axios.get(
           `${BASE_URL}/movie/${id}?api_key=${API_KEY}&language=en-US`
         );
-        
+
         if (!isMounted) return;
-        
+
         // Check if movie exists
         if (!movieResponse.data) {
           throw new Error("Movie not found");
         }
-        
+
         setMovie(movieResponse.data);
 
         // Fetch cast information
         const creditsResponse = await axios.get(
           `${BASE_URL}/movie/${id}/credits?api_key=${API_KEY}`
         );
-        
+
         if (!isMounted) return;
         setCast(creditsResponse.data.cast.slice(0, 10));
 
@@ -54,13 +55,13 @@ export default function Details() {
         const similarResponse = await axios.get(
           `${BASE_URL}/movie/${id}/similar?api_key=${API_KEY}&language=ta&with_original_language=ta&region=IN&page=1`
         );
-        
+
         if (!isMounted) return;
         setSimilarMovies(similarResponse.data.results.slice(0, 6));
 
       } catch (err) {
         if (!isMounted) return;
-        
+
         console.error("Error fetching movie details:", err);
         if (err.response?.status === 404) {
           setError("Movie not found. Please check the movie ID.");
@@ -81,7 +82,7 @@ export default function Details() {
     };
 
     fetchMovieDetails();
-    
+
     // Cleanup function to prevent memory leaks and state updates on unmounted component
     return () => {
       isMounted = false;
@@ -93,13 +94,13 @@ export default function Details() {
       alert("Please login to add movies to your watchlist");
       return;
     }
-    
+
     const isMovieInWatchList = watchList?.some((item) => item.id === movie.id);
     if (isMovieInWatchList) {
       alert("Movie is already in your watchlist");
       return;
     }
-    
+
     dispatch(addMovie(movie));
     alert("Movie added to watchlist!");
   };
@@ -149,7 +150,7 @@ export default function Details() {
             alt={movie.title}
             className="img-fluid rounded shadow"
             onError={(e) => {
-              e.target.src = 'https://via.placeholder.com/500x750?text=No+Image+Available';
+              e.target.src = PLACEHOLDER_POSTER;
             }}
           />
           {isAuthenticated && (
@@ -211,7 +212,7 @@ export default function Details() {
                         className="card-img-top rounded"
                         alt={actor.name}
                         onError={(e) => {
-                          e.target.src = 'https://via.placeholder.com/200x300?text=No+Image';
+                          e.target.src = PLACEHOLDER_PROFILE;
                         }}
                       />
                       <div className="card-body p-2">
@@ -238,7 +239,7 @@ export default function Details() {
                         className="card-img-top rounded"
                         alt={movie.title}
                         onError={(e) => {
-                          e.target.src = 'https://via.placeholder.com/200x300?text=No+Image';
+                          e.target.src = PLACEHOLDER_POSTER;
                         }}
                       />
                       <div className="card-body p-2">

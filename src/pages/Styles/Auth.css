@@ -28,7 +28,7 @@ body {
 /* Only apply background on login page */
 body.login-background {
   background: 
-    linear-gradient(135deg, rgba(20, 20, 20, 0), rgba(43, 43, 43, 0)),
+    linear-gradient(135deg, rgba(48, 47, 47, 0.623), rgba(43, 43, 43, 0.705)),
     url('https://i0.wp.com/isaishop.com/wp-content/uploads/2022/05/Tamil-Great-Movies.jpg?fit=1920%2C1080&ssl=1') no-repeat center center / cover;
   background-attachment: fixed;
 }
@@ -53,24 +53,25 @@ body.login-background {
 
 /* Card-style form box */
 .auth-card {
-  background: rgba(255, 255, 255, 0);
+  background: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(10px);
   border-radius: 16px;
   padding: 2.5rem;
   width: 100%;
   max-width: 400px;
-  box-shadow: 0 8px 32px rgba(230, 228, 228, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(229, 9, 20, 0.3);
+  border: 2px solid #e50914;
 }
 
 /* Register page specific card style */
 .register-page .auth-card {
-  background: rgba(16, 16, 16, 0); /* Lighter background for Register card */
+  background: rgba(255, 255, 255, 0.3);
   border-radius: 16px;
   padding: 2.5rem;
-  max-width: 450px;  /* Slightly wider for Register page */
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);  /* Stronger shadow */
-  border: 1px solid rgba(234, 8, 8, 0.2);  /* Lighter border */
+  max-width: 450px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
 }
 body.login-background .auth-card h2 {
   color: #ffffff;
@@ -78,20 +79,22 @@ body.login-background .auth-card h2 {
   margin-bottom: 2rem;
   font-size: 2rem;
   font-weight: 600;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 body.register-page .auth-card h2 {
-  color: #000000;
+  color: #333333;
   text-align: center;
   margin-bottom: 2rem;
   font-size: 2rem;
   font-weight: 600;
+  text-shadow: none;
 }
 
 .auth-error {
-  background: rgba(229, 9, 20, 0.1);
-  border: 1px solid #e50914;
-  color: #e50914;
+  background: rgba(251, 255, 0, 0.627);
+  border: 2px solid #fd0202;
+  color: #f20101;
   padding: 1rem;
   border-radius: 8px;
   margin-bottom: 1.5rem;
@@ -110,15 +113,23 @@ body.register-page .auth-card h2 {
   gap: 0.5rem;
 }
 
+/* Default label style */
 .form-group label {
-  color: #00000ec7;
+  color: #ffffff;
   font-size: 0.9rem;
   font-weight: 500;
 }
 
+/* Override for register page labels */
+body.register-page .form-group label {
+  color: #333333;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
 body.login-background .form-group input {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(40, 40, 40, 0.9);
+  border: 1px solid #e50914;
   color: #ffffff;
   border-radius: 8px;
   padding: 0.75rem 1rem;
@@ -127,30 +138,39 @@ body.login-background .form-group input {
 }
 
 body.register-page .form-group input {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #000000;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(70, 70, 70, 0.2);
+  color: #333333;
   border-radius: 8px;
   padding: 0.75rem 1rem;
   font-size: 1rem;
   transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 body.register-page .form-group input::placeholder {
   color: rgba(0, 0, 0, 0.6);
 }
 
-.form-group input:focus {
+body.login-background .form-group input:focus {
   outline: none;
-  border-color: #130102;
-  background: rgba(239, 243, 8, 0.1);
+  border-color: #e50914;
+  background: rgba(20, 20, 20, 0.95);
+  box-shadow: 0 0 10px rgba(229, 9, 20, 0.4);
+}
+
+body.register-page .form-group input:focus {
+  outline: none;
+  border-color: #e2844a;
+  background: #ffffff;
+  box-shadow: 0 0 10px rgba(74, 144, 226, 0.2);
 }
 .form-group input::placeholder {
-  color: rgba(118, 116, 116, 0.6); /* Pale gray */
+  color: rgba(255, 255, 255, 0.5); /* Light gray for better visibility */
 }
 
 
-.auth-button {
+body.login-background .auth-button {
   background: #e50914;
   color: #fff;
   border: none;
@@ -161,11 +181,39 @@ body.register-page .form-group input::placeholder {
   cursor: pointer;
   transition: all 0.3s ease;
   margin-top: 1rem;
+  box-shadow: 0 4px 8px rgba(229, 9, 20, 0.3);
 }
 
-.auth-button:hover {
-  background: #000000de;
+body.register-page .auth-button {
+  background: #e50914;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+  box-shadow: 0 4px 8px rgba(229, 9, 20, 0.3);
+}
+
+body.login-background .auth-button:hover {
+  background: #2ecc71;
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(46, 204, 113, 0.4);
+}
+
+body.register-page .auth-button:hover {
+  background: #2ecc71;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(46, 204, 113, 0.4);
+}
+
+body.register-page .auth-button:active {
+  background: #27ae60;
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(46, 204, 113, 0.2);
 }
 
 .auth-button:active {

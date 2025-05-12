@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { addToFavorites, removeFromFavorites } from "../../../store/Slices/favorites";
+import { PLACEHOLDER_POSTER } from "../../../utils/placeholderImage";
 import '../Styles/MovieCardVertical.css';
 
 export default function MovieCardVertical({ movie }) {
@@ -13,7 +14,7 @@ export default function MovieCardVertical({ movie }) {
 
   const imageUrl = movie.poster_path
     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-    : 'https://via.placeholder.com/500x750?text=No+Image+Available';
+    : PLACEHOLDER_POSTER;
 
   const releaseYear = movie.release_date ? new Date(movie.release_date).getFullYear() : 'N/A';
   const rating = movie.vote_average ? (movie.vote_average * 10).toFixed(0) : 'N/A';
@@ -40,7 +41,7 @@ export default function MovieCardVertical({ movie }) {
           <div className={`movie-rating ${rating >= 70 ? 'high' : rating >= 50 ? 'medium' : 'low'}`}>
             {rating}%
           </div>
-          <button 
+          <button
             className={`favorite-btn ${isFavorite ? 'active' : ''}`}
             onClick={handleFavoriteClick}
             aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
@@ -61,7 +62,7 @@ export default function MovieCardVertical({ movie }) {
         </div>
       </div>
       {isHovered && (
-        <div 
+        <div
           className="movie-card-back"
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
@@ -89,7 +90,7 @@ export default function MovieCardVertical({ movie }) {
               <button className="view-btn" onClick={handleViewClick}>
                 View Details
               </button>
-              <button 
+              <button
                 className={`favorite-btn-large ${isFavorite ? 'active' : ''}`}
                 onClick={handleFavoriteClick}
               >

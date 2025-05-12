@@ -56,7 +56,7 @@ export default function Register() {
     }
 
     try {
-      const result = await dispatch(register(formData)).unwrap();
+      await dispatch(register(formData)).unwrap();
       navigate("/login");
     } catch (err) {
       const errorMessage =

@@ -9,6 +9,7 @@ import {
   removeFromFavoritesAsync
 } from "../../store/Slices/favorites";
 import { spotifyService } from "../../services/spotifyService";
+import { PLACEHOLDER_BACKDROP, PLACEHOLDER_POSTER, PLACEHOLDER_PROFILE } from "../../utils/placeholderImage";
 import "../Styles/MovieDetails.css";
 
 const API_KEY = "1f54bd990f1cdfb230adb312546d765d";
@@ -49,6 +50,10 @@ export default function MovieDetails() {
           `${BASE_URL}/movie/${id}?api_key=${API_KEY}&language=en-US`
         );
         setMovie(movieResponse.data);
+
+        // Log poster_path and backdrop_path for debugging
+        console.log("Movie poster_path:", movieResponse.data.poster_path);
+        console.log("Movie backdrop_path:", movieResponse.data.backdrop_path);
 
         // Fetch cast
         const creditsResponse = await axios.get(
@@ -351,7 +356,7 @@ export default function MovieDetails() {
               <iframe
                 src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=0&loop=1&playlist=${trailerKey}&showinfo=0`}
                 title="Movie Trailer"
-                frameBorder="0"
+                style={{ border: 0 }}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               ></iframe>
@@ -372,19 +377,29 @@ export default function MovieDetails() {
               </button>
             </div>
           ) : (
-            <div
-              className="backdrop-image"
-              style={{
-                backgroundImage: `url(https://image.tmdb.org/t/p/original${movie.backdrop_path})`
-              }}
-            />
+          <div
+            className="backdrop-image"
+            style={{
+              backgroundImage: movie.backdrop_path
+                ? `url(https://image.tmdb.org/t/p/original${movie.backdrop_path})`
+                : `url(${PLACEHOLDER_BACKDROP})`
+            }}
+          />
           )}
           <div className="hero-overlay">
             <div className="hero-content">
               <div className="movie-poster">
                 <img
-                  src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                  src={movie.poster_path
+                    ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+                    : PLACEHOLDER_POSTER
+                  }
                   alt={movie.title}
+                  onError={(e) => {
+                    console.error('Failed to load poster image:', e.target.src);
+                    e.target.onerror = null;
+                    e.target.src = PLACEHOLDER_POSTER;
+                  }}
                 />
               </div>
               <div className="movie-info">
@@ -455,9 +470,14 @@ export default function MovieDetails() {
                     <img
                       src={person.profile_path
                         ? `https://image.tmdb.org/t/p/w185${person.profile_path}`
-                        : 'https://via.placeholder.com/185x278?text=No+Image'
+                        : PLACEHOLDER_PROFILE
                       }
                       alt={person.name}
+                      onError={(e) => {
+                        console.error('Failed to load profile image:', e.target.src);
+                        e.target.onerror = null;
+                        e.target.src = PLACEHOLDER_PROFILE;
+                      }}
                     />
                   </div>
                   <div className="cast-info">
@@ -528,6 +548,11 @@ export default function MovieDetails() {
                             <img
                               src={item.track.album.images[0].url}
                               alt={item.track.name}
+                              onError={(e) => {
+                                console.error('Failed to load album image:', e.target.src);
+                                e.target.onerror = null;
+                                e.target.parentNode.innerHTML = '<div class="no-image">🎵</div>';
+                              }}
                             />
                           ) : (
                             <div className="no-image">🎵</div>
@@ -583,8 +608,7 @@ export default function MovieDetails() {
                               src={`https://open.spotify.com/embed/track/${item.track.id}?utm_source=generator&theme=0&autoplay=1`}
                               width="100%"
                               height="80"
-                              frameBorder="0"
-                              allowtransparency="true"
+                              style={{ border: 0 }}
                               allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                               loading="eager" // Changed from lazy to eager for faster loading
                               title={`Play ${item.track.name}`}
