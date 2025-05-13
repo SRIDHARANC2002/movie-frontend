@@ -1,28 +1,23 @@
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import Navbar from './components/Layout/JavaScript/Navbar';
 import RoutesConfig from './routes/RoutesConfig';
-import { fetchFavorites } from './store/Slices/favorites';
+import { login } from './store/Slices/auth';
+import './App.css';
 
 function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    // Get token from localStorage
+    // Check for existing auth state on app load
     const token = localStorage.getItem('token');
+    const user = localStorage.getItem('user');
     
-    // If we have a token, fetch favorites
-    if (token) {
-      dispatch(fetchFavorites());
+    if (token && user) {
+      dispatch(login({ token, user: JSON.parse(user) }));
     }
   }, [dispatch]);
 
-  return (
-    <div className="App">
-      <Navbar />
-      <RoutesConfig />
-    </div>
-  );
+  return <RoutesConfig />;
 }
 
 export default App;

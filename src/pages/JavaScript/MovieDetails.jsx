@@ -9,8 +9,8 @@ import {
   removeFromFavoritesAsync
 } from "../../store/Slices/favorites";
 import { spotifyService } from "../../services/spotifyService";
-import { PLACEHOLDER_BACKDROP, PLACEHOLDER_POSTER, PLACEHOLDER_PROFILE } from "../../utils/placeholderImage";
 import "../Styles/MovieDetails.css";
+import { useNavigate } from "react-router-dom";
 
 const API_KEY = "1f54bd990f1cdfb230adb312546d765d";
 const BASE_URL = "https://api.themoviedb.org/3";
@@ -30,6 +30,8 @@ export default function MovieDetails() {
   const [isPlaying, setIsPlaying] = useState(false);
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
   // Safely access favorites with fallback to empty array
   const favorites = useSelector((state) => {
@@ -38,9 +40,14 @@ export default function MovieDetails() {
 
   const isFavorite = favorites.some((m) => m?.id === Number(id));
 
+  // Check authentication and fetch favorites on mount
   useEffect(() => {
-    window.scrollTo(0, 0); // Scroll to top when id changes
+    if (isAuthenticated) {
+      dispatch(fetchFavorites());
+    }
+  }, [isAuthenticated, dispatch]);
 
+  useEffect(() => {
     const fetchMovieDetails = async () => {
       try {
         setLoading(true);
@@ -50,10 +57,6 @@ export default function MovieDetails() {
           `${BASE_URL}/movie/${id}?api_key=${API_KEY}&language=en-US`
         );
         setMovie(movieResponse.data);
-
-        // Log poster_path and backdrop_path for debugging
-        console.log("Movie poster_path:", movieResponse.data.poster_path);
-        console.log("Movie backdrop_path:", movieResponse.data.backdrop_path);
 
         // Fetch cast
         const creditsResponse = await axios.get(
@@ -65,15 +68,11 @@ export default function MovieDetails() {
         const videosResponse = await axios.get(
           `${BASE_URL}/movie/${id}/videos?api_key=${API_KEY}&language=en-US`
         );
-        console.log("Videos fetched for trailer:", videosResponse.data.results);
         const trailer = videosResponse.data.results.find(
-          (video) => (video.type === "Trailer" || video.type === "Teaser") && video.site === "YouTube"
+          (video) => video.type === "Trailer" && video.site === "YouTube"
         );
         if (trailer) {
           setTrailerKey(trailer.key);
-        } else {
-          setTrailerKey(null);
-          console.warn("No trailer or teaser found for this movie.");
         }
 
         setError(null);
@@ -304,33 +303,27 @@ export default function MovieDetails() {
   };
 
   const handleFavoriteClick = () => {
-    const token = localStorage.getItem('token');
+    if (!isAuthenticated) {
+      const confirmLogin = window.confirm('Please log in to add movies to favorites. Would you like to log in?');
+      if (confirmLogin) {
+        // Save current movie page URL to localStorage
+        localStorage.setItem('redirectAfterLogin', window.location.pathname);
+        navigate('/login');
+      }
+      return;
+    }
 
     if (isFavorite) {
-      // If user is logged in, use async action to update backend
-      if (token) {
-        dispatch(removeFromFavoritesAsync(Number(id)));
-      } else {
-        // Otherwise just update local state
-        dispatch(removeFromFavorites(Number(id)));
-      }
+      dispatch(removeFromFavoritesAsync(Number(id)));
     } else {
-      // If user is logged in, use async action to update backend
-      if (token) {
-        dispatch(addToFavoritesAsync(movie));
-      } else {
-        // Otherwise just update local state
-        dispatch(addToFavorites(movie));
-      }
+      dispatch(addToFavoritesAsync(movie));
     }
   };
-
-
 
   if (loading) {
     return (
       <div className="loading-container">
-        <div className="dotted-spinner"></div>
+        <div className="spinner"></div>
       </div>
     );
   }
@@ -356,7 +349,7 @@ export default function MovieDetails() {
               <iframe
                 src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=0&loop=1&playlist=${trailerKey}&showinfo=0`}
                 title="Movie Trailer"
-                style={{ border: 0 }}
+                frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               ></iframe>
@@ -377,29 +370,19 @@ export default function MovieDetails() {
               </button>
             </div>
           ) : (
-          <div
-            className="backdrop-image"
-            style={{
-              backgroundImage: movie.backdrop_path
-                ? `url(https://image.tmdb.org/t/p/original${movie.backdrop_path})`
-                : `url(${PLACEHOLDER_BACKDROP})`
-            }}
-          />
+            <div
+              className="backdrop-image"
+              style={{
+                backgroundImage: `url(https://image.tmdb.org/t/p/original${movie.backdrop_path})`
+              }}
+            />
           )}
           <div className="hero-overlay">
             <div className="hero-content">
               <div className="movie-poster">
                 <img
-                  src={movie.poster_path
-                    ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-                    : PLACEHOLDER_POSTER
-                  }
+                  src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
                   alt={movie.title}
-                  onError={(e) => {
-                    console.error('Failed to load poster image:', e.target.src);
-                    e.target.onerror = null;
-                    e.target.src = PLACEHOLDER_POSTER;
-                  }}
                 />
               </div>
               <div className="movie-info">
@@ -470,14 +453,9 @@ export default function MovieDetails() {
                     <img
                       src={person.profile_path
                         ? `https://image.tmdb.org/t/p/w185${person.profile_path}`
-                        : PLACEHOLDER_PROFILE
+                        : 'https://via.placeholder.com/185x278?text=No+Image'
                       }
                       alt={person.name}
-                      onError={(e) => {
-                        console.error('Failed to load profile image:', e.target.src);
-                        e.target.onerror = null;
-                        e.target.src = PLACEHOLDER_PROFILE;
-                      }}
                     />
                   </div>
                   <div className="cast-info">
@@ -548,11 +526,6 @@ export default function MovieDetails() {
                             <img
                               src={item.track.album.images[0].url}
                               alt={item.track.name}
-                              onError={(e) => {
-                                console.error('Failed to load album image:', e.target.src);
-                                e.target.onerror = null;
-                                e.target.parentNode.innerHTML = '<div class="no-image">🎵</div>';
-                              }}
                             />
                           ) : (
                             <div className="no-image">🎵</div>
@@ -608,7 +581,8 @@ export default function MovieDetails() {
                               src={`https://open.spotify.com/embed/track/${item.track.id}?utm_source=generator&theme=0&autoplay=1`}
                               width="100%"
                               height="80"
-                              style={{ border: 0 }}
+                              frameBorder="0"
+                              allowtransparency="true"
                               allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                               loading="eager" // Changed from lazy to eager for faster loading
                               title={`Play ${item.track.name}`}

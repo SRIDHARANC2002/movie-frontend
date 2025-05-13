@@ -1,10 +1,13 @@
 import axios from "axios";
+import axiosAuth from "./axiosAuth";
 
-const axiosCreate = axios.create({
+export const axiosPublic = axios.create({
   baseURL: process.env.REACT_APP_API_URL,
   params: {
     api_key: process.env.REACT_APP_API_KEY,
   },
 });
-export default axiosCreate;
-``
+
+// Export both authenticated and public instances
+export { axiosAuth };
+export default axiosPublic;

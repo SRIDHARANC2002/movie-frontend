@@ -1,12 +1,10 @@
 import axios from 'axios';
 // const API_URL = "http://localhost:5005/api/users";
- const API_URL = "https://movie-backend-4-qrw2.onrender.com/api/users";
- const BACKEND_URL = "https://movie-backend-4-qrw2.onrender.com";
+const API_URL = "https://movie-backend-4-qrw2.onrender.com/api/users";
+const BACKEND_URL = "https://movie-backend-4-qrw2.onrender.com";
 //const BACKEND_URL = "http://localhost:5005";
 //const API_URL = `${BACKEND_URL}/api/users`;
 //const API_URL = "http://localhost:5005/api/users";
-export 
-//const BACKEND_URL = "http://localhost:5005";
 
 const refreshAuthToken = async () => {
   try {
@@ -92,7 +90,7 @@ export const authService = {
                 // Store token and user data in localStorage
                 localStorage.setItem('token', response.data.token);
                 localStorage.setItem('user', JSON.stringify(response.data.user));
-                
+
                 // Log the user data for debugging
                 console.log('👤 User data stored in localStorage:', response.data.user);
                 if (response.data.user.profilePicture) {
@@ -191,7 +189,7 @@ export const authService = {
                     try {
                         // Try to refresh the token
                         token = await refreshAuthToken();
-                        
+
                         // Retry the update with the new token
                         const response = await axios.put(
                             `${API_URL}/update`,
@@ -203,7 +201,7 @@ export const authService = {
                                 }
                             }
                         );
-                        
+
                         return response.data;
                     } catch (refreshError) {
                         console.error('Token refresh failed:', refreshError);
@@ -229,7 +227,7 @@ export const authService = {
     uploadProfilePicture: async (file) => {
         try {
             console.log('📸 Uploading profile picture...');
-            
+
             // Get current token
             let token = localStorage.getItem('token');
             if (!token) {
@@ -257,7 +255,7 @@ export const authService = {
                     const userData = JSON.parse(localStorage.getItem('user') || '{}');
                     userData.profilePicture = response.data.user.profilePicture;
                     localStorage.setItem('user', JSON.stringify(userData));
-                    
+
                     console.log('🖼️ Profile picture URL:', response.data.user.profilePicture);
                     return response.data;
                 }
@@ -266,7 +264,7 @@ export const authService = {
                     try {
                         // Try to refresh the token
                         token = await refreshAuthToken();
-                        
+
                         // Retry upload with new token
                         const response = await axios.post(
                             `${API_URL}/profile-picture`,
@@ -278,13 +276,13 @@ export const authService = {
                                 }
                             }
                         );
-                        
+
                         if (response.data.user && response.data.user.profilePicture) {
                             // Update local storage with new profile picture
                             const userData = JSON.parse(localStorage.getItem('user') || '{}');
                             userData.profilePicture = response.data.user.profilePicture;
                             localStorage.setItem('user', JSON.stringify(userData));
-                            
+
                             return response.data;
                         }
                     } catch (refreshError) {
