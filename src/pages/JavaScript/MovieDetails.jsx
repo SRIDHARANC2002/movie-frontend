@@ -317,17 +317,43 @@ export default function MovieDetails() {
     }
 
     if (isFavorite) {
-      // Just use the synchronous action - it will update localStorage
-      dispatch(removeFromFavorites(Number(id)));
+      // Skip the sync action and use only the async action
+      // This ensures we're always updating the server
+      console.log('Removing movie from favorites (ID:', id, ')');
 
-      // Show a success message
-      console.log('✅ Movie removed from favorites');
+      dispatch(removeFromFavoritesAsync(Number(id)))
+        .unwrap()
+        .then((result) => {
+          console.log('✅ Movie removed from favorites (server updated)', result);
+
+          // Force UI update with sync action after server update
+          dispatch(removeFromFavorites(Number(id)));
+        })
+        .catch(error => {
+          console.error('Error removing from favorites on server:', error);
+
+          // Still update UI even if server update fails
+          dispatch(removeFromFavorites(Number(id)));
+        });
     } else {
-      // Just use the synchronous action - it will update localStorage
-      dispatch(addToFavorites(movie));
+      // Skip the sync action and use only the async action
+      // This ensures we're always updating the server
+      console.log('Adding movie to favorites:', movie.title);
 
-      // Show a success message
-      console.log('✅ Movie added to favorites');
+      dispatch(addToFavoritesAsync(movie))
+        .unwrap()
+        .then((result) => {
+          console.log('✅ Movie added to favorites (server updated)', result);
+
+          // Force UI update with sync action after server update
+          dispatch(addToFavorites(movie));
+        })
+        .catch(error => {
+          console.error('Error adding to favorites on server:', error);
+
+          // Still update UI even if server update fails
+          dispatch(addToFavorites(movie));
+        });
     }
   };
 

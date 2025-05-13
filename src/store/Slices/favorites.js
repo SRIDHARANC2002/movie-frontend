@@ -24,24 +24,50 @@ const loadFavoritesFromLocalStorage = () => {
 // Async thunks for API calls
 export const fetchFavorites = createAsyncThunk(
   'favorites/fetchFavorites',
-  async (_, { getState }) => {
+  async (_, { getState, rejectWithValue }) => {
     // Get current favorites from state
     const currentFavorites = getState().favorites.movies;
+    const isAuthenticated = getState().auth.isAuthenticated;
+
+    // If not authenticated, just return current favorites
+    if (!isAuthenticated) {
+      console.log('⚠️ Not authenticated, using local favorites only');
+      return currentFavorites;
+    }
 
     try {
+      console.log('🔍 Fetching favorites from server in thunk...');
       // This will return [] on error instead of throwing
       const backendFavorites = await favoriteService.getFavorites();
 
-      // If backend returned empty array but we have local favorites, keep them
+      console.log(`📊 Server returned ${backendFavorites.length} favorites`);
+
+      // If backend returned empty array but we have local favorites, we need to sync them
       if (backendFavorites.length === 0 && currentFavorites.length > 0) {
-        return currentFavorites;
+        console.log('⚠️ Server has no favorites but we have local ones - syncing to server');
+
+        // Try to sync local favorites to server
+        try {
+          // Add each local favorite to the server
+          for (const movie of currentFavorites) {
+            console.log(`🔄 Syncing movie to server: ${movie.title}`);
+            await favoriteService.addToFavorites(movie);
+          }
+
+          // Fetch again after syncing
+          const updatedFavorites = await favoriteService.getFavorites();
+          console.log(`✅ After sync: Server has ${updatedFavorites.length} favorites`);
+          return updatedFavorites.length > 0 ? updatedFavorites : currentFavorites;
+        } catch (syncError) {
+          console.error('❌ Error syncing favorites to server:', syncError);
+          return currentFavorites;
+        }
       }
 
       return backendFavorites;
     } catch (error) {
-      // This shouldn't happen with our updated service, but just in case
-      console.error('Unexpected error in fetchFavorites thunk:', error);
-      return currentFavorites;
+      console.error('❌ Unexpected error in fetchFavorites thunk:', error);
+      return rejectWithValue('Failed to fetch favorites from server');
     }
   }
 );

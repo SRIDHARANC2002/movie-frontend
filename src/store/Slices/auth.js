@@ -27,11 +27,26 @@ export const login = createAsyncThunk(
   'auth/login',
   async (credentials, { rejectWithValue, dispatch }) => {
     try {
+      console.log('🔑 Logging in user...');
       const response = await authService.login(credentials);
-      dispatch(fetchFavorites());
+      console.log('✅ Login successful, fetching favorites...');
+
+      // Wait a moment to ensure token is properly set before fetching favorites
+      setTimeout(() => {
+        dispatch(fetchFavorites())
+          .unwrap()
+          .then(favorites => {
+            console.log(`✅ Successfully fetched ${favorites.length} favorites after login`);
+          })
+          .catch(error => {
+            console.error('❌ Error fetching favorites after login:', error);
+          });
+      }, 500);
+
       return response;
     } catch (error) {
       // Convert Error object to a serializable format
+      console.error('❌ Login failed:', error);
       return rejectWithValue(error.message || 'Login failed');
     }
   }

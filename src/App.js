@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import Navbar from './components/Layout/JavaScript/Navbar';
 import RoutesConfig from './routes/RoutesConfig';
-import { login } from './store/Slices/auth';
+// Removed unused import: import { login } from './store/Slices/auth';
 import { fetchFavorites } from './store/Slices/favorites';
 import './App.css';
 
@@ -36,20 +36,60 @@ function App() {
             payload: { token, user }
           });
 
-          // Load favorites from localStorage instead of fetching from server
+          // Fetch favorites from server with a slight delay to ensure token is set
           try {
-            const localFavorites = localStorage.getItem('favorites');
-            if (localFavorites) {
-              const favorites = JSON.parse(localFavorites);
-              // Update Redux store with favorites from localStorage
-              dispatch({
-                type: 'favorites/fetchFavorites/fulfilled',
-                payload: favorites
-              });
-              console.log('✅ Favorites loaded from localStorage');
-            }
+            console.log('🔄 Fetching favorites from server after login restoration');
+
+            // Wait a moment to ensure token is properly set
+            setTimeout(() => {
+              // Use the fetchFavorites thunk to get favorites from the server
+              dispatch(fetchFavorites())
+                .unwrap()
+                .then((favorites) => {
+                  console.log(`✅ Fetched ${favorites.length} favorites from server`);
+                })
+                .catch((error) => {
+                  console.warn('⚠️ Error fetching favorites from server:', error);
+
+                  // Try a second time with a different approach
+                  console.log('🔄 Trying again with direct service call...');
+
+                  // Use the service directly as a fallback
+                  import('./services/favoriteService').then(({ favoriteService }) => {
+                    favoriteService.getFavorites()
+                      .then(favorites => {
+                        console.log(`✅ Direct service call: Fetched ${favorites.length} favorites`);
+
+                        // Update Redux store with favorites
+                        dispatch({
+                          type: 'favorites/fetchFavorites/fulfilled',
+                          payload: favorites
+                        });
+                      })
+                      .catch(serviceError => {
+                        console.warn('⚠️ Direct service call failed:', serviceError);
+
+                        // Fallback to localStorage if all server attempts fail
+                        try {
+                          const localFavorites = localStorage.getItem('favorites');
+                          if (localFavorites) {
+                            const favorites = JSON.parse(localFavorites);
+                            // Update Redux store with favorites from localStorage
+                            dispatch({
+                              type: 'favorites/fetchFavorites/fulfilled',
+                              payload: favorites
+                            });
+                            console.log(`✅ Loaded ${favorites.length} favorites from localStorage as fallback`);
+                          }
+                        } catch (localError) {
+                          console.warn('⚠️ Error loading favorites from localStorage:', localError);
+                        }
+                      });
+                  });
+                });
+            }, 1000); // Wait 1 second to ensure token is set
           } catch (favError) {
-            console.warn('⚠️ Error loading favorites from localStorage:', favError);
+            console.warn('⚠️ Error dispatching fetchFavorites:', favError);
           }
 
           return true; // Successfully restored auth state

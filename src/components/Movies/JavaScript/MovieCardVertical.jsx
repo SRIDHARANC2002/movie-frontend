@@ -1,7 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { addToFavorites, removeFromFavorites } from "../../../store/Slices/favorites";
+import {
+  addToFavorites,
+  removeFromFavorites,
+  addToFavoritesAsync,
+  removeFromFavoritesAsync
+} from "../../../store/Slices/favorites";
 import { PLACEHOLDER_POSTER } from "../../../utils/placeholderImage";
 import '../Styles/MovieCardVertical.css';
 
@@ -9,6 +14,7 @@ export default function MovieCardVertical({ movie }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const favorites = useSelector((state) => state.favorites.movies);
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   // Convert IDs to numbers for consistent comparison
   const isFavorite = favorites.some((m) => Number(m.id) === Number(movie.id));
   const [isHovered, setIsHovered] = useState(false);
@@ -27,13 +33,51 @@ export default function MovieCardVertical({ movie }) {
 
   const handleFavoriteClick = (e) => {
     e.stopPropagation();
+
+    if (!isAuthenticated) {
+      const confirmLogin = window.confirm('Please log in to add movies to favorites. Would you like to log in?');
+      if (confirmLogin) {
+        // Save current URL to localStorage
+        localStorage.setItem('redirectAfterLogin', window.location.pathname);
+        navigate('/login');
+      }
+      return;
+    }
+
     if (isFavorite) {
-      // Convert movie.id to a number to ensure type consistency
+      // Use the async action first to prioritize server update
+      console.log('Removing movie from favorites (ID:', movie.id, ')');
+
+      // Show immediate feedback in UI
       dispatch(removeFromFavorites(Number(movie.id)));
-      console.log('✅ Removed from favorites:', movie.title);
+
+      // Then update the server
+      dispatch(removeFromFavoritesAsync(Number(movie.id)))
+        .unwrap()
+        .then((result) => {
+          console.log('✅ Movie removed from favorites (server updated):', movie.title, result);
+        })
+        .catch(error => {
+          console.error('Error removing from favorites on server:', error);
+          // The UI is already updated, so no need to do anything else
+        });
     } else {
+      // Use the async action first to prioritize server update
+      console.log('Adding movie to favorites:', movie.title);
+
+      // Show immediate feedback in UI
       dispatch(addToFavorites(movie));
-      console.log('✅ Added to favorites:', movie.title);
+
+      // Then update the server - THIS IS THE IMPORTANT PART
+      dispatch(addToFavoritesAsync(movie))
+        .unwrap()
+        .then((result) => {
+          console.log('✅ Movie added to favorites (server updated):', movie.title, result);
+        })
+        .catch(error => {
+          console.error('Error adding to favorites on server:', error);
+          // The UI is already updated, so no need to do anything else
+        });
     }
   };
 
