@@ -91,9 +91,6 @@ export const authService = {
                 localStorage.setItem('token', response.data.token);
                 localStorage.setItem('user', JSON.stringify(response.data.user));
 
-                // Store login timestamp for session tracking
-                localStorage.setItem('loginTimestamp', Date.now().toString());
-
                 // Log the user data for debugging
                 console.log('👤 User data stored in localStorage:', response.data.user);
                 if (response.data.user.profilePicture) {
@@ -148,10 +145,9 @@ export const authService = {
         console.log('👋 Logging out...');
 
         try {
-            // Remove auth data from localStorage
+            // Remove both token and user data from localStorage
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            localStorage.removeItem('loginTimestamp');
             console.log('✅ Logout successful');
 
             // Clear any session cookies that might be present

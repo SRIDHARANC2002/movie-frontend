@@ -13,24 +13,17 @@ export default function Login() {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, error: authError, isAuthenticated } = useSelector((state) => state.auth);
+  const { loading, error: authError } = useSelector((state) => state.auth);
 
-  // Check if user is already authenticated and add login-background class
+  // Add login-background class to body when component mounts
   useEffect(() => {
-    // Add login-background class to body
     document.body.classList.add('login-background');
-
-    // Check if user is already authenticated
-    if (isAuthenticated) {
-      console.log('⚠️ User is already authenticated, redirecting to home page');
-      navigate('/home');
-    }
 
     // Remove the class when component unmounts
     return () => {
       document.body.classList.remove('login-background');
     };
-  }, [isAuthenticated, navigate]);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -53,34 +46,19 @@ export default function Login() {
     setLocalError('');
     if (authError) dispatch(clearError());
 
-    // Basic validation
-    if (!formData.email || !formData.password) {
-      setLocalError('Please enter both email and password');
-      return;
-    }
-
     try {
-      console.log('🔄 Attempting to log in with provided credentials...');
       const result = await dispatch(login(formData)).unwrap();
-
       if (result) {
-        console.log('✅ Login successful, redirecting to home page');
-        // Set a flag in sessionStorage to indicate this is a fresh login
-        sessionStorage.setItem('freshLogin', 'true');
-
-        // Navigate to the home page
-        navigate("/home", { replace: true });
+        navigate("/");
       }
     } catch (error) {
-      console.error('❌ Login failed:', error);
-
+      console.error('Login failed:', error);
       // Convert Error object to string for display
       const errorMessage = error instanceof Error
         ? error.message
         : typeof error === 'object' && error !== null
           ? JSON.stringify(error)
           : String(error);
-
       // Set a local error state for display
       setLocalError(errorMessage);
     }

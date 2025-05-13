@@ -118,6 +118,9 @@ class WebSocketHandler {
   }
 }
 
+// Create a singleton instance for the development WebSocket
+let devWebSocket = null;
+
 /**
  * Initialize the development WebSocket connection
  * Currently disabled to prevent connection errors
