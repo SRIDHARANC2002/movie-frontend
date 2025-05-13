@@ -10,8 +10,25 @@ function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    // Function to check if there's a fresh login
+    const checkFreshLogin = () => {
+      const freshLogin = sessionStorage.getItem('freshLogin');
+      if (freshLogin === 'true') {
+        console.log('✅ Fresh login detected, no need to restore auth state');
+        // Clear the flag
+        sessionStorage.removeItem('freshLogin');
+        return true;
+      }
+      return false;
+    };
+
     // Function to restore auth state from localStorage
-    const restoreAuthState = () => {
+    const restoreAuthState = async () => {
+      // If there's a fresh login, skip restoration
+      if (checkFreshLogin()) {
+        return true;
+      }
+
       try {
         const token = localStorage.getItem('token');
         const userStr = localStorage.getItem('user');
@@ -25,77 +42,32 @@ function App() {
           // Parse the user data
           const user = JSON.parse(userStr);
 
-          // Update Redux store directly without making API calls
-          // This ensures we don't get logged out if the API is temporarily unavailable
           console.log('🔄 Restoring authentication state from localStorage');
 
-          // Instead of using the login thunk which makes API calls,
-          // we'll directly update the Redux store
+          // Update Redux store directly to maintain login state
           dispatch({
             type: 'auth/login/fulfilled',
             payload: { token, user }
           });
 
           // Fetch favorites from server with a slight delay to ensure token is set
-          try {
-            console.log('🔄 Fetching favorites from server after login restoration');
-
-            // Wait a moment to ensure token is properly set
-            setTimeout(() => {
-              // Use the fetchFavorites thunk to get favorites from the server
-              dispatch(fetchFavorites())
-                .unwrap()
-                .then((favorites) => {
-                  console.log(`✅ Fetched ${favorites.length} favorites from server`);
-                })
-                .catch((error) => {
-                  console.warn('⚠️ Error fetching favorites from server:', error);
-
-                  // Try a second time with a different approach
-                  console.log('🔄 Trying again with direct service call...');
-
-                  // Use the service directly as a fallback
-                  import('./services/favoriteService').then(({ favoriteService }) => {
-                    favoriteService.getFavorites()
-                      .then(favorites => {
-                        console.log(`✅ Direct service call: Fetched ${favorites.length} favorites`);
-
-                        // Update Redux store with favorites
-                        dispatch({
-                          type: 'favorites/fetchFavorites/fulfilled',
-                          payload: favorites
-                        });
-                      })
-                      .catch(serviceError => {
-                        console.warn('⚠️ Direct service call failed:', serviceError);
-
-                        // Fallback to localStorage if all server attempts fail
-                        try {
-                          const localFavorites = localStorage.getItem('favorites');
-                          if (localFavorites) {
-                            const favorites = JSON.parse(localFavorites);
-                            // Update Redux store with favorites from localStorage
-                            dispatch({
-                              type: 'favorites/fetchFavorites/fulfilled',
-                              payload: favorites
-                            });
-                            console.log(`✅ Loaded ${favorites.length} favorites from localStorage as fallback`);
-                          }
-                        } catch (localError) {
-                          console.warn('⚠️ Error loading favorites from localStorage:', localError);
-                        }
-                      });
-                  });
-                });
-            }, 1000); // Wait 1 second to ensure token is set
-          } catch (favError) {
-            console.warn('⚠️ Error dispatching fetchFavorites:', favError);
-          }
+          setTimeout(() => {
+            dispatch(fetchFavorites())
+              .unwrap()
+              .then((favorites) => {
+                console.log(`✅ Fetched ${favorites.length} favorites after restoring auth state`);
+              })
+              .catch((error) => {
+                console.warn('⚠️ Error fetching favorites after restoring auth state:', error);
+              });
+          }, 500);
 
           return true; // Successfully restored auth state
         } catch (parseError) {
           console.error('❌ Error parsing user data from localStorage:', parseError);
-          // Don't clear localStorage here, as it might be a temporary error
+          // Clear invalid data
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
           return false;
         }
       } catch (error) {
@@ -106,20 +78,7 @@ function App() {
     };
 
     // Restore auth state immediately
-    const restored = restoreAuthState();
-
-    // If auth state was restored, set up a background token validation
-    if (restored) {
-      // Skip token validation for now to avoid unnecessary errors
-      // We'll rely on the interceptors to handle token refresh when needed
-      console.log('✅ Authentication state restored successfully');
-
-      // No need for background validation since we've already restored the state
-      const validateTokenTimeout = setTimeout(() => {}, 0);
-
-      // Clean up the timeout when the component unmounts
-      return () => clearTimeout(validateTokenTimeout);
-    }
+    restoreAuthState();
   }, [dispatch]);
 
   return (

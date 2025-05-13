@@ -132,13 +132,15 @@ export const favoriteService = {
     try {
       console.log('➕ Adding movie to favorites:', movie.title);
 
-      // Extract only the necessary fields to avoid sending too much data
+      // Extract the fields that the backend expects
+      // The backend controller expects: id, title, poster_path, release_date, vote_average, overview
       const movieData = {
         id: Number(movie.id),  // Ensure ID is a number
         title: movie.title,
-        poster_path: movie.poster_path,
-        release_date: movie.release_date,
-        vote_average: movie.vote_average
+        poster_path: movie.poster_path || '',
+        release_date: movie.release_date || '',
+        vote_average: movie.vote_average || 0,
+        overview: movie.overview || ''  // Add overview field which backend might expect
       };
 
       console.log('Sending movie data:', movieData);
@@ -154,34 +156,35 @@ export const favoriteService = {
         'Content-Type': 'application/json'
       };
 
+      // Based on the backend code, we need to send the movie data directly
+      // The backend expects: id, title, poster_path, release_date, vote_average, overview
       try {
-        // Format 1: Send movieId only (most common API format)
-        response = await axiosAuth.post(API_URL, { movieId: Number(movie.id) }, { headers });
-        console.log('Format 1 succeeded (movieId only)');
+        // Format 1: Send movie object directly - this matches the backend expectation
+        response = await axiosAuth.post(API_URL, movieData, { headers });
+        console.log('Format 1 succeeded (movie object directly)');
       } catch (error1) {
         console.log('First add attempt failed:', error1.message);
 
+        // If the first attempt fails, try with minimal required fields
         try {
-          // Format 2: Send movie object directly
-          response = await axiosAuth.post(API_URL, movieData, { headers });
-          console.log('Format 2 succeeded (movie object directly)');
+          // Format 2: Send minimal required fields (id and title are required by backend)
+          response = await axiosAuth.post(API_URL, {
+            id: Number(movie.id),
+            title: movie.title,
+            poster_path: movie.poster_path || '',
+            release_date: movie.release_date || '',
+            vote_average: movie.vote_average || 0
+          }, { headers });
+          console.log('Format 2 succeeded (minimal required fields)');
         } catch (error2) {
           console.log('Second add attempt failed:', error2.message);
 
-          try {
-            // Format 3: Send movie object wrapped in a movie property
-            response = await axiosAuth.post(API_URL, { movie: movieData }, { headers });
-            console.log('Format 3 succeeded (wrapped in movie property)');
-          } catch (error3) {
-            console.log('Third add attempt failed:', error3.message);
-
-            // Format 4: Last resort - try with minimal data
-            response = await axiosAuth.post(API_URL, {
-              id: Number(movie.id),
-              title: movie.title
-            }, { headers });
-            console.log('Format 4 succeeded (minimal data)');
-          }
+          // Last resort - try with just the required fields
+          response = await axiosAuth.post(API_URL, {
+            id: Number(movie.id),
+            title: movie.title
+          }, { headers });
+          console.log('Format 3 succeeded (id and title only)');
         }
       }
 
@@ -208,18 +211,21 @@ export const favoriteService = {
       try {
         const currentFavorites = JSON.parse(localStorage.getItem('favorites') || '[]');
         if (!currentFavorites.some(m => Number(m.id) === Number(movie.id))) {
-          const movieData = {
+          // Use the same movieData format as above to ensure consistency
+          const movieDataForStorage = {
             id: Number(movie.id),
             title: movie.title,
-            poster_path: movie.poster_path,
-            release_date: movie.release_date,
-            vote_average: movie.vote_average
+            poster_path: movie.poster_path || '',
+            release_date: movie.release_date || '',
+            vote_average: movie.vote_average || 0,
+            overview: movie.overview || ''
           };
-          currentFavorites.push(movieData);
+          currentFavorites.push(movieDataForStorage);
           localStorage.setItem('favorites', JSON.stringify(currentFavorites));
+          console.log('✅ Movie saved to localStorage as fallback');
         }
       } catch (storageError) {
-        console.error('Error saving to localStorage:', storageError);
+        console.error('❌ Error saving to localStorage:', storageError);
       }
 
       // Return the movie anyway so UI doesn't break
@@ -247,33 +253,35 @@ export const favoriteService = {
       // Try multiple endpoint formats to see which one works
       let response;
 
+      // Based on the backend code, we should use the RESTful approach with the ID in the URL
       try {
-        // Format 1: Use URL parameter (RESTful approach)
+        // Format 1: Use URL parameter with numeric ID (RESTful approach)
+        // This matches the backend route: router.delete('/:id', removeFavorite);
         response = await axiosAuth.delete(`${API_URL}/${numericMovieId}`, { headers });
-        console.log('Format 1 succeeded (URL parameter)');
+        console.log('Format 1 succeeded (URL parameter with numeric ID)');
       } catch (error1) {
         console.log('First delete attempt failed:', error1.message);
 
         try {
-          // Format 2: Use query parameter
-          response = await axiosAuth.delete(`${API_URL}?movieId=${numericMovieId}`, { headers });
-          console.log('Format 2 succeeded (query parameter)');
+          // Format 2: Use URL parameter with string ID (in case backend expects string)
+          response = await axiosAuth.delete(`${API_URL}/${String(numericMovieId)}`, { headers });
+          console.log('Format 2 succeeded (URL parameter with string ID)');
         } catch (error2) {
           console.log('Second delete attempt failed:', error2.message);
 
           try {
-            // Format 3: Send movieId in request body
+            // Format 3: Send id in request body (not standard but might work)
             response = await axiosAuth.delete(`${API_URL}`, {
               headers,
-              data: { movieId: numericMovieId }
+              data: { id: numericMovieId }
             });
-            console.log('Format 3 succeeded (request body)');
+            console.log('Format 3 succeeded (request body with id)');
           } catch (error3) {
             console.log('Third delete attempt failed:', error3.message);
 
-            // Format 4: Last resort - try with POST method and _method=DELETE
+            // Format 4: Last resort - try with POST method and /remove endpoint
             response = await axiosAuth.post(`${API_URL}/remove`, {
-              movieId: numericMovieId
+              id: numericMovieId
             }, { headers });
             console.log('Format 4 succeeded (POST with /remove endpoint)');
           }

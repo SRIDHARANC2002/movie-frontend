@@ -27,9 +27,17 @@ export const login = createAsyncThunk(
   'auth/login',
   async (credentials, { rejectWithValue, dispatch }) => {
     try {
+      // Validate credentials
+      if (!credentials.email || !credentials.password) {
+        return rejectWithValue('Email and password are required');
+      }
+
       console.log('🔑 Logging in user...');
       const response = await authService.login(credentials);
       console.log('✅ Login successful, fetching favorites...');
+
+      // Store login timestamp for session tracking
+      localStorage.setItem('loginTimestamp', Date.now().toString());
 
       // Wait a moment to ensure token is properly set before fetching favorites
       setTimeout(() => {
@@ -47,7 +55,16 @@ export const login = createAsyncThunk(
     } catch (error) {
       // Convert Error object to a serializable format
       console.error('❌ Login failed:', error);
-      return rejectWithValue(error.message || 'Login failed');
+
+      // Clear any partial auth data on login failure
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+
+      return rejectWithValue(
+        error.response?.data?.message ||
+        error.message ||
+        'Invalid email or password. Please try again.'
+      );
     }
   }
 );
@@ -90,9 +107,19 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     logout: (state) => {
+      // Update state
       state.isAuthenticated = false;
       state.user = null;
+
+      // Clear localStorage
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('loginTimestamp');
+
+      // Call service logout
       authService.logout();
+
+      console.log('👋 Logging out...');
     },
     updateUserDetails: (state, action) => {
       if (state.user) {

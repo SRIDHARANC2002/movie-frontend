@@ -29,25 +29,25 @@ class WebSocketHandler {
   connect() {
     try {
       this.socket = new WebSocket(this.url);
-      
+
       this.socket.onopen = (event) => {
         console.log(`WebSocket connected to ${this.url}`);
         this.isConnected = true;
         this.reconnectAttempts = 0;
         this.connectionHandlers.onOpen.forEach(handler => handler(event));
       };
-      
+
       this.socket.onmessage = (event) => {
         this.messageHandlers.forEach(handler => handler(event.data));
       };
-      
+
       this.socket.onclose = (event) => {
         console.log(`WebSocket connection closed: ${event.code} ${event.reason}`);
         this.isConnected = false;
         this.connectionHandlers.onClose.forEach(handler => handler(event));
         this.attemptReconnect();
       };
-      
+
       this.socket.onerror = (error) => {
         console.log('WebSocket error occurred');
         this.connectionHandlers.onError.forEach(handler => handler(error));
@@ -64,7 +64,7 @@ class WebSocketHandler {
     if (this.reconnectAttempts < this.options.maxReconnectAttempts) {
       this.reconnectAttempts++;
       console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.options.maxReconnectAttempts})...`);
-      
+
       setTimeout(() => {
         this.connect();
       }, this.options.reconnectInterval);
@@ -118,27 +118,16 @@ class WebSocketHandler {
   }
 }
 
-// Create a singleton instance for the development WebSocket
-let devWebSocket = null;
-
 /**
  * Initialize the development WebSocket connection
+ * Currently disabled to prevent connection errors
  */
 export function initDevWebSocket() {
-  // Only create the connection in development mode
-  if (process.env.NODE_ENV === 'development' && !devWebSocket) {
-    devWebSocket = new WebSocketHandler('ws://localhost:3001/ws');
-    
-    // Add error handler to prevent console errors
-    devWebSocket.onError(() => {
-      console.log('Development WebSocket connection failed - this is normal if the dev server is not running');
-    });
-    
-    // Try to connect
-    devWebSocket.connect();
-  }
-  
-  return devWebSocket;
+  // WebSocket functionality is disabled
+  console.log('WebSocket functionality is disabled');
+
+  // Return null instead of attempting to connect
+  return null;
 }
 
 export default WebSocketHandler;

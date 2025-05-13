@@ -36,7 +36,7 @@ export default function Navbar() {
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
       <div className="container">
-        <Link className="navbar-brand multicolor-text" to="/">
+        <Link className="navbar-brand multicolor-text" to={isAuthenticated ? "/home" : "/login"}>
           Tamil Movie
         </Link>
         <button
@@ -55,7 +55,7 @@ export default function Navbar() {
             {isAuthenticated ? (
               <>
                 <li className="nav-item">
-                  <Link className="nav-link" to="/">
+                  <Link className="nav-link" to="/home">
                     <FontAwesomeIcon icon={faHome} className="me-2" /> Home
                   </Link>
                 </li>
