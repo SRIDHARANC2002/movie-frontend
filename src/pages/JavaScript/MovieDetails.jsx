@@ -6,9 +6,11 @@ import {
   addToFavorites,
   removeFromFavorites,
   addToFavoritesAsync,
-  removeFromFavoritesAsync
+  removeFromFavoritesAsync,
+  fetchFavorites
 } from "../../store/Slices/favorites";
 import { spotifyService } from "../../services/spotifyService";
+import { PLACEHOLDER_POSTER, PLACEHOLDER_PROFILE, PLACEHOLDER_BACKDROP } from "../../utils/placeholderImage";
 import "../Styles/MovieDetails.css";
 import { useNavigate } from "react-router-dom";
 
@@ -38,7 +40,8 @@ export default function MovieDetails() {
     return state.favorites?.movies || [];
   });
 
-  const isFavorite = favorites.some((m) => m?.id === Number(id));
+  // Convert IDs to numbers for consistent comparison
+  const isFavorite = favorites.some((m) => Number(m?.id) === Number(id));
 
   // Check authentication and fetch favorites on mount
   useEffect(() => {
@@ -314,9 +317,17 @@ export default function MovieDetails() {
     }
 
     if (isFavorite) {
-      dispatch(removeFromFavoritesAsync(Number(id)));
+      // Just use the synchronous action - it will update localStorage
+      dispatch(removeFromFavorites(Number(id)));
+
+      // Show a success message
+      console.log('✅ Movie removed from favorites');
     } else {
-      dispatch(addToFavoritesAsync(movie));
+      // Just use the synchronous action - it will update localStorage
+      dispatch(addToFavorites(movie));
+
+      // Show a success message
+      console.log('✅ Movie added to favorites');
     }
   };
 
@@ -373,7 +384,9 @@ export default function MovieDetails() {
             <div
               className="backdrop-image"
               style={{
-                backgroundImage: `url(https://image.tmdb.org/t/p/original${movie.backdrop_path})`
+                backgroundImage: movie.backdrop_path
+                  ? `url(https://image.tmdb.org/t/p/original${movie.backdrop_path})`
+                  : `url(${PLACEHOLDER_BACKDROP})`
               }}
             />
           )}
@@ -381,7 +394,10 @@ export default function MovieDetails() {
             <div className="hero-content">
               <div className="movie-poster">
                 <img
-                  src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                  src={movie.poster_path
+                    ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+                    : PLACEHOLDER_POSTER
+                  }
                   alt={movie.title}
                 />
               </div>
@@ -453,7 +469,7 @@ export default function MovieDetails() {
                     <img
                       src={person.profile_path
                         ? `https://image.tmdb.org/t/p/w185${person.profile_path}`
-                        : 'https://via.placeholder.com/185x278?text=No+Image'
+                        : PLACEHOLDER_PROFILE
                       }
                       alt={person.name}
                     />

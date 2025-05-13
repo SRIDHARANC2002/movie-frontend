@@ -143,10 +143,23 @@ export const authService = {
 
     logout: () => {
         console.log('👋 Logging out...');
-        // Remove both token and user data from localStorage
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        console.log('✅ Logout successful');
+
+        try {
+            // Remove both token and user data from localStorage
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            console.log('✅ Logout successful');
+
+            // Clear any session cookies that might be present
+            document.cookie.split(";").forEach(function(c) {
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+            });
+
+            return true;
+        } catch (error) {
+            console.error('❌ Error during logout:', error);
+            return false;
+        }
     },
 
     updateUserDetails: async (userData) => {

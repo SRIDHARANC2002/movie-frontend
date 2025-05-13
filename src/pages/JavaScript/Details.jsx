@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { addMovie } from "../../store/Slices/watchlist";
-import { PLACEHOLDER_POSTER, PLACEHOLDER_PROFILE } from "../../utils/placeholderImage";
+import { PLACEHOLDER_POSTER, PLACEHOLDER_PROFILE, PLACEHOLDER_SMALL } from "../../utils/placeholderImage";
 
 const API_KEY = "1f54bd990f1cdfb230adb312546d765d";
 const BASE_URL = "https://api.themoviedb.org/3";
@@ -239,7 +239,7 @@ export default function Details() {
                         className="card-img-top rounded"
                         alt={movie.title}
                         onError={(e) => {
-                          e.target.src = PLACEHOLDER_POSTER;
+                          e.target.src = PLACEHOLDER_SMALL;
                         }}
                       />
                       <div className="card-body p-2">

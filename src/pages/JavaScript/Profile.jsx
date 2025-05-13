@@ -587,12 +587,6 @@ export default function Profile() {
                           src={previewUrl}
                           alt="Profile"
                           className="profile-picture"
-                          onError={(e) => {
-                            console.error('Failed to load profile image:', previewUrl);
-                            e.target.onerror = null;
-                            // Use a data URL SVG as fallback
-                            e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSI3NSIgY3k9IjUwIiByPSIzMCIgZmlsbD0iIzZjNzU3ZCIvPjxjaXJjbGUgY3g9Ijc1IiBjeT0iMTYwIiByPSI3MCIgZmlsbD0iIzZjNzU3ZCIvPjwvc3ZnPg==';
-                          }}
                         />
                       ) : (
                         <div className="profile-picture-placeholder">

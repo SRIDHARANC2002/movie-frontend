@@ -9,7 +9,8 @@ export default function MovieCardVertical({ movie }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const favorites = useSelector((state) => state.favorites.movies);
-  const isFavorite = favorites.some((m) => m.id === movie.id);
+  // Convert IDs to numbers for consistent comparison
+  const isFavorite = favorites.some((m) => Number(m.id) === Number(movie.id));
   const [isHovered, setIsHovered] = useState(false);
 
   const imageUrl = movie.poster_path
@@ -27,9 +28,12 @@ export default function MovieCardVertical({ movie }) {
   const handleFavoriteClick = (e) => {
     e.stopPropagation();
     if (isFavorite) {
-      dispatch(removeFromFavorites(movie.id));
+      // Convert movie.id to a number to ensure type consistency
+      dispatch(removeFromFavorites(Number(movie.id)));
+      console.log('✅ Removed from favorites:', movie.title);
     } else {
       dispatch(addToFavorites(movie));
+      console.log('✅ Added to favorites:', movie.title);
     }
   };
 

@@ -31,7 +31,8 @@ export const login = createAsyncThunk(
       dispatch(fetchFavorites());
       return response;
     } catch (error) {
-      return rejectWithValue(error);
+      // Convert Error object to a serializable format
+      return rejectWithValue(error.message || 'Login failed');
     }
   }
 );
@@ -119,7 +120,11 @@ const authSlice = createSlice({
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload?.message || 'Login failed';
+        // Handle serialized error message
+        state.error = action.payload || 'Login failed';
+
+        // Don't clear authentication state on login failure
+        // This ensures users stay logged in if they reload during a failed login attempt
       })
       // Update User Details
       .addCase(updateUserDetailsAsync.pending, (state) => {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { login, clearError } from "../../store/Slices/auth";
@@ -14,6 +14,16 @@ export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading, error: authError } = useSelector((state) => state.auth);
+
+  // Add login-background class to body when component mounts
+  useEffect(() => {
+    document.body.classList.add('login-background');
+
+    // Remove the class when component unmounts
+    return () => {
+      document.body.classList.remove('login-background');
+    };
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -39,22 +49,17 @@ export default function Login() {
     try {
       const result = await dispatch(login(formData)).unwrap();
       if (result) {
-        // Check if there's a redirect URL stored
-        const redirectUrl = localStorage.getItem('redirectAfterLogin');
-        if (redirectUrl) {
-          localStorage.removeItem('redirectAfterLogin'); // Clear it after use
-          navigate(redirectUrl);
-        } else {
-          navigate("/");
-        }
+        navigate("/");
       }
     } catch (error) {
       console.error('Login failed:', error);
+      // Convert Error object to string for display
       const errorMessage = error instanceof Error
         ? error.message
         : typeof error === 'object' && error !== null
           ? JSON.stringify(error)
           : String(error);
+      // Set a local error state for display
       setLocalError(errorMessage);
     }
   };
