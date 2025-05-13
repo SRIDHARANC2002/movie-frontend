@@ -1,7 +1,7 @@
-import { axiosAuth } from '../axios/config';
+import { axiosAuth } from './axiosConfig';
 
 // Base URL for the favorites API
-const API_URL = "https://movie-backend-4-qrw2.onrender.com/api/favorites";
+const API_URL = "/api/favorites";
 // Removed unused variable: const API_URL_LOCAL = "MONGODB_URI=mongodb+srv://sridharan:sridharan@cluster0.wsrdh.mongodb.net/tamilMovie-DB?retryWrites=true&w=majority&appName=Cluster0"
 // Helper function to log detailed error information
 const logErrorDetails = (error, operation) => {
@@ -36,7 +36,7 @@ export const favoriteService = {
       console.log('🔍 Fetching favorites from server...');
 
       // Log the token to verify it's being sent
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token') || localStorage.getItem('token');
       console.log('Using token (first 10 chars):', token ? token.substring(0, 10) + '...' : 'No token');
 
       // Set up explicit headers
@@ -144,7 +144,7 @@ export const favoriteService = {
       console.log('Sending movie data:', movieData);
 
       // Log the token to verify it's being sent
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token') || localStorage.getItem('token');
       console.log('Using token (first 10 chars):', token ? token.substring(0, 10) + '...' : 'No token');
 
       // Try different request formats with explicit headers
@@ -155,16 +155,16 @@ export const favoriteService = {
       };
 
       try {
-        // Format 1: Send movieId only (most common API format)
-        response = await axiosAuth.post(API_URL, { movieId: Number(movie.id) }, { headers });
-        console.log('Format 1 succeeded (movieId only)');
+        // Format 1: Send movie object directly - this matches the backend expectation
+        response = await axiosAuth.post(API_URL, movieData, { headers });
+        console.log('Format 1 succeeded (movie object directly)');
       } catch (error1) {
         console.log('First add attempt failed:', error1.message);
 
         try {
-          // Format 2: Send movie object directly
-          response = await axiosAuth.post(API_URL, movieData, { headers });
-          console.log('Format 2 succeeded (movie object directly)');
+          // Format 2: Send movieId only (some APIs expect this format)
+          response = await axiosAuth.post(API_URL, { movieId: Number(movie.id) }, { headers });
+          console.log('Format 2 succeeded (movieId only)');
         } catch (error2) {
           console.log('Second add attempt failed:', error2.message);
 
@@ -235,7 +235,7 @@ export const favoriteService = {
       const numericMovieId = Number(movieId);
 
       // Log the token to verify it's being sent
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token') || localStorage.getItem('token');
       console.log('Using token (first 10 chars):', token ? token.substring(0, 10) + '...' : 'No token');
 
       // Set up headers

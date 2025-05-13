@@ -24,6 +24,11 @@
   border-radius: 2px;
 }
 
+/* Blue accent for watch list page */
+.watch-list-container h1::after {
+  background: #007bff;
+}
+
 .favorites-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -49,6 +54,13 @@
   width: 64px;
   height: 64px;
   fill: #e50914;
+  margin-bottom: 1.5rem;
+}
+
+.empty-content .watch-icon {
+  width: 64px;
+  height: 64px;
+  color: #007bff;
   margin-bottom: 1.5rem;
 }
 

@@ -1,28 +1,46 @@
-import React from "react";
-import { useSelector } from "react-redux";
-import MovieCardHorizontal from "../../components/Movies/JavaScript/MovieCardHorizontal";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchWatchList } from '../../store/Slices/watchlist';
+import MovieCardVertical from "../../components/Movies/JavaScript/MovieCardVertical";
+import "../Styles/Favorites.css";
+import { faEye } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export default function WatchList() {
-  // Safely access watchlist with fallback to empty array
+  const dispatch = useDispatch();
+  // Safely access watch list with fallback to empty array
   const watchList = useSelector((state) => {
-    return state.watchList?.watchListValues || [];
+    return state.watchList?.movies || [];
   });
 
-  return (
-    <div className="container mt-4">
-      <h2 className="mb-4">My Watchlist</h2>
+  useEffect(() => {
+    dispatch(fetchWatchList());
+  }, [dispatch]);
 
-      {watchList.length === 0 ? (
-        <div className="alert alert-info">
-          Your watchlist is empty. Add some movies to watch later!
+  if (watchList.length === 0) {
+    return (
+      <div className="favorites-empty">
+        <div className="empty-content">
+          <FontAwesomeIcon icon={faEye} className="watch-icon" size="3x" />
+          <h2>No Movies in Watch List Yet</h2>
+          <p>Start adding movies to your watch list by clicking the eye icon on any movie card!</p>
         </div>
-      ) : (
-        <div>
-          {watchList.map((movie) => (
-            <MovieCardHorizontal key={movie.id} movie={movie} />
-          ))}
-        </div>
-      )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="favorites-container watch-list-container">
+      <h1>My Watch List</h1>
+      <div className="favorites-grid">
+        {watchList.map((movie) => (
+          <MovieCardVertical
+            key={movie.id}
+            movie={movie}
+            isInWatchList={true}
+          />
+        ))}
+      </div>
     </div>
   );
 }

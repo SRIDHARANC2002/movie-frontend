@@ -26,65 +26,65 @@ function RoutesConfig() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        
+
         {/* Protected Routes */}
-        <Route 
-          path="/" 
+        <Route
+          path="/"
           element={
             <ProtectedRoute>
               <Home />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/watchList" 
+        <Route
+          path="/watchlist"
           element={
             <ProtectedRoute>
               <WatchList />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/details/:id" 
+        <Route
+          path="/details/:id"
           element={
             <ProtectedRoute>
               <Details />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/search" 
+        <Route
+          path="/search"
           element={
             <ProtectedRoute>
               <Search />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/user" 
+        <Route
+          path="/user"
           element={
             <ProtectedRoute>
               <Profile />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/movie/:id" 
+        <Route
+          path="/movie/:id"
           element={
             <ProtectedRoute>
               <MovieDetails />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/favorites" 
+        <Route
+          path="/favorites"
           element={
             <ProtectedRoute>
               <Favorites />
             </ProtectedRoute>
-          } 
+          }
         />
-        
+
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>

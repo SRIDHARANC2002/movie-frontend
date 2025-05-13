@@ -9,6 +9,13 @@ import {
   removeFromFavoritesAsync,
   fetchFavorites
 } from "../../store/Slices/favorites";
+import {
+  addToWatchList,
+  removeFromWatchList,
+  addToWatchListAsync,
+  removeFromWatchListAsync,
+  fetchWatchList
+} from "../../store/Slices/watchlist";
 import { spotifyService } from "../../services/spotifyService";
 import { PLACEHOLDER_POSTER, PLACEHOLDER_PROFILE, PLACEHOLDER_BACKDROP } from "../../utils/placeholderImage";
 import "../Styles/MovieDetails.css";
@@ -40,13 +47,20 @@ export default function MovieDetails() {
     return state.favorites?.movies || [];
   });
 
+  // Safely access watch list with fallback to empty array
+  const watchList = useSelector((state) => {
+    return state.watchList?.movies || [];
+  });
+
   // Convert IDs to numbers for consistent comparison
   const isFavorite = favorites.some((m) => Number(m?.id) === Number(id));
+  const isInWatchList = watchList.some((m) => Number(m?.id) === Number(id));
 
-  // Check authentication and fetch favorites on mount
+  // Check authentication and fetch favorites and watch list on mount
   useEffect(() => {
     if (isAuthenticated) {
       dispatch(fetchFavorites());
+      dispatch(fetchWatchList());
     }
   }, [isAuthenticated, dispatch]);
 
@@ -357,6 +371,58 @@ export default function MovieDetails() {
     }
   };
 
+  const handleWatchListClick = () => {
+    if (!isAuthenticated) {
+      const confirmLogin = window.confirm('Please log in to add movies to your watch list. Would you like to log in?');
+      if (confirmLogin) {
+        // Save current movie page URL to localStorage
+        localStorage.setItem('redirectAfterLogin', window.location.pathname);
+        navigate('/login');
+      }
+      return;
+    }
+
+    if (isInWatchList) {
+      // Skip the sync action and use only the async action
+      // This ensures we're always updating the server
+      console.log('Removing movie from watch list (ID:', id, ')');
+
+      dispatch(removeFromWatchListAsync(Number(id)))
+        .unwrap()
+        .then((result) => {
+          console.log('✅ Movie removed from watch list (server updated)', result);
+
+          // Force UI update with sync action after server update
+          dispatch(removeFromWatchList(Number(id)));
+        })
+        .catch(error => {
+          console.error('Error removing from watch list on server:', error);
+
+          // Still update UI even if server update fails
+          dispatch(removeFromWatchList(Number(id)));
+        });
+    } else {
+      // Skip the sync action and use only the async action
+      // This ensures we're always updating the server
+      console.log('Adding movie to watch list:', movie.title);
+
+      dispatch(addToWatchListAsync(movie))
+        .unwrap()
+        .then((result) => {
+          console.log('✅ Movie added to watch list (server updated)', result);
+
+          // Force UI update with sync action after server update
+          dispatch(addToWatchList(movie));
+        })
+        .catch(error => {
+          console.error('Error adding to watch list on server:', error);
+
+          // Still update UI even if server update fails
+          dispatch(addToWatchList(movie));
+        });
+    }
+  };
+
   if (loading) {
     return (
       <div className="loading-container">
@@ -457,6 +523,15 @@ export default function MovieDetails() {
                       <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                     </svg>
                     {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
+                  </button>
+                  <button
+                    className={`watchlist-button ${isInWatchList ? 'active' : ''}`}
+                    onClick={handleWatchListClick}
+                  >
+                    <svg viewBox="0 0 24 24" className="watchlist-icon">
+                      <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+                    </svg>
+                    {isInWatchList ? 'Remove from Watch List' : 'Add to Watch List'}
                   </button>
                 </div>
               </div>

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
-import { addMovie } from "../../store/Slices/watchlist";
+import { addToWatchList } from "../../store/Slices/watchlist";
 import { PLACEHOLDER_POSTER, PLACEHOLDER_PROFILE, PLACEHOLDER_SMALL } from "../../utils/placeholderImage";
 
 const API_KEY = "1f54bd990f1cdfb230adb312546d765d";
@@ -19,7 +19,7 @@ export default function Details() {
 
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.auth);
-  const watchList = useSelector((state) => state.watchlist?.watchListValues);
+  const watchList = useSelector((state) => state.watchList?.movies || []);
 
   useEffect(() => {
     let isMounted = true;
@@ -101,7 +101,7 @@ export default function Details() {
       return;
     }
 
-    dispatch(addMovie(movie));
+    dispatch(addToWatchList(movie));
     alert("Movie added to watchlist!");
   };
 

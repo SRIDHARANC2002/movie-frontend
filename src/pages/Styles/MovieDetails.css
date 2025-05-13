@@ -274,7 +274,7 @@
   margin-top: 20px;
 }
 
-.favorite-button {
+.favorite-button, .watchlist-button {
   background: rgba(255, 255, 255, 0.1);
   color: white;
   backdrop-filter: blur(5px);
@@ -292,7 +292,7 @@
   transition: all 0.3s ease;
 }
 
-.favorite-button:hover {
+.favorite-button:hover, .watchlist-button:hover {
   background: rgba(255, 255, 255, 0.2);
   transform: translateY(-2px);
 }
@@ -301,7 +301,11 @@
   background: #e50914;
 }
 
-.favorite-button .heart-icon {
+.watchlist-button.active {
+  background: #007bff;
+}
+
+.favorite-button .heart-icon, .watchlist-button .watchlist-icon {
   width: 20px;
   height: 20px;
   fill: currentColor;
@@ -823,7 +827,8 @@
   }
 
   .play-button,
-  .favorite-button {
+  .favorite-button,
+  .watchlist-button {
     width: 100%;
     margin-bottom: 10px;
   }
