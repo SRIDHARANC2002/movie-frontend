@@ -1,7 +1,7 @@
 import { axiosAuth } from './axiosConfig';
 
 // Base URL for the favorites API - path will be appended to axiosAuth baseURL
-const FAVORITES_PATH = '/api/favorites';
+const FAVORITES_PATH = 'https://movie-server-1-3u79.onrender.com/api/favorites';
 
 // Helper function to log detailed error information
 const logErrorDetails = (error, operation) => {

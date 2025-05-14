@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 // Use the dedicated watchlist endpoint
-const API_URL = 'http://localhost:5005/api/watchlist';
-//const API_URL = "https://movie-backend-4-qrw2.onrender.com/api/watchlist";
+const API_URL = 'https://movie-server-1-3u79.onrender.com/api/watchlist';
+
 // Helper function to log error details
 const logErrorDetails = (error, action) => {
   console.error(`❌ Error ${action}:`, error);
