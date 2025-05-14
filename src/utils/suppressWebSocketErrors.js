@@ -14,7 +14,11 @@ console.error = function(...args) {
     (
       arg.includes('WebSocket') ||
       arg.includes('ws://') ||
-      arg.includes('WebSocketClient')
+      arg.includes('wss://') ||
+      arg.includes('WebSocketClient') ||
+      arg.includes('Failed to construct \'WebSocket\'') ||
+      arg.includes('WebSocket connection to') ||
+      arg.includes('WebSocket connection failed')
     )
   );
 
@@ -25,8 +29,28 @@ console.error = function(...args) {
   }
 };
 
+// Also suppress WebSocket warnings
+const originalConsoleWarn = console.warn;
+console.warn = function(...args) {
+  // Check if this is a WebSocket warning
+  const isWebSocketWarning = args.some(arg =>
+    typeof arg === 'string' &&
+    (
+      arg.includes('WebSocket') ||
+      arg.includes('ws://') ||
+      arg.includes('wss://')
+    )
+  );
+
+  // If it's a WebSocket warning, completely suppress it
+  if (!isWebSocketWarning) {
+    // For all other warnings, pass them through to the original console.warn
+    originalConsoleWarn.apply(console, args);
+  }
+};
+
 export default function setupWebSocketErrorSuppression() {
   // This function doesn't need to do anything since the console.error override
   // happens when this module is imported
-  console.log('WebSocket errors are now completely suppressed');
+  console.log('WebSocket errors and warnings are now completely suppressed');
 }

@@ -1,7 +1,8 @@
+import axios from 'axios';
 import { axiosAuth } from './axiosConfig';
 
 // Base URL for the favorites API
-const API_URL = "/api/favorites";
+const API_URL = "https://movie-backend-4-qrw2.onrender.com/api/favorites";
 // Removed unused variable: const API_URL_LOCAL = "MONGODB_URI=mongodb+srv://sridharan:sridharan@cluster0.wsrdh.mongodb.net/tamilMovie-DB?retryWrites=true&w=majority&appName=Cluster0"
 // Helper function to log detailed error information
 const logErrorDetails = (error, operation) => {
@@ -49,28 +50,35 @@ export const favoriteService = {
       let response;
 
       try {
+        // Use the full URL to avoid any base URL issues
+        const fullUrl = 'https://movie-backend-4-qrw2.onrender.com/api/favorites';
+        console.log('🔄 Fetching favorites from:', fullUrl);
+
         // Format 1: Standard endpoint
-        response = await axiosAuth.get(API_URL, { headers });
+        response = await axios.get(fullUrl, { headers });
         console.log('Format 1 succeeded (standard endpoint)');
       } catch (error1) {
         console.log('First get attempt failed:', error1.message);
 
         try {
           // Format 2: Try with /user suffix
-          response = await axiosAuth.get(`${API_URL}/user`, { headers });
+          const fullUrl = 'https://movie-backend-4-qrw2.onrender.com/api/favorites/user';
+          response = await axios.get(fullUrl, { headers });
           console.log('Format 2 succeeded (/user suffix)');
         } catch (error2) {
           console.log('Second get attempt failed:', error2.message);
 
           try {
             // Format 3: Try with /me suffix
-            response = await axiosAuth.get(`${API_URL}/me`, { headers });
+            const fullUrl = 'https://movie-backend-4-qrw2.onrender.com/api/favorites/me';
+            response = await axios.get(fullUrl, { headers });
             console.log('Format 3 succeeded (/me suffix)');
           } catch (error3) {
             console.log('Third get attempt failed:', error3.message);
 
             // Format 4: Try with query parameter
-            response = await axiosAuth.get(`${API_URL}?userId=me`, { headers });
+            const fullUrl = 'https://movie-backend-4-qrw2.onrender.com/api/favorites?userId=me';
+            response = await axios.get(fullUrl, { headers });
             console.log('Format 4 succeeded (query parameter)');
           }
         }
@@ -155,28 +163,35 @@ export const favoriteService = {
       };
 
       try {
+        // Use the full URL to avoid any base URL issues
+        const fullUrl = 'https://movie-backend-4-qrw2.onrender.com/api/favorites';
+        console.log('🔄 Sending request to:', fullUrl);
+
         // Format 1: Send movie object directly - this matches the backend expectation
-        response = await axiosAuth.post(API_URL, movieData, { headers });
+        response = await axios.post(fullUrl, movieData, { headers });
         console.log('Format 1 succeeded (movie object directly)');
       } catch (error1) {
         console.log('First add attempt failed:', error1.message);
 
         try {
           // Format 2: Send movieId only (some APIs expect this format)
-          response = await axiosAuth.post(API_URL, { movieId: Number(movie.id) }, { headers });
+          const fullUrl = 'https://movie-backend-4-qrw2.onrender.com/api/favorites';
+          response = await axios.post(fullUrl, { movieId: Number(movie.id) }, { headers });
           console.log('Format 2 succeeded (movieId only)');
         } catch (error2) {
           console.log('Second add attempt failed:', error2.message);
 
           try {
             // Format 3: Send movie object wrapped in a movie property
-            response = await axiosAuth.post(API_URL, { movie: movieData }, { headers });
+            const fullUrl = 'https://movie-backend-4-qrw2.onrender.com/api/favorites';
+            response = await axios.post(fullUrl, { movie: movieData }, { headers });
             console.log('Format 3 succeeded (wrapped in movie property)');
           } catch (error3) {
             console.log('Third add attempt failed:', error3.message);
 
             // Format 4: Last resort - try with minimal data
-            response = await axiosAuth.post(API_URL, {
+            const fullUrl = 'https://movie-backend-4-qrw2.onrender.com/api/favorites';
+            response = await axios.post(fullUrl, {
               id: Number(movie.id),
               title: movie.title
             }, { headers });
@@ -248,22 +263,28 @@ export const favoriteService = {
       let response;
 
       try {
+        // Use the full URL to avoid any base URL issues
+        const fullUrl = `https://movie-backend-4-qrw2.onrender.com/api/favorites/${numericMovieId}`;
+        console.log('🔄 Removing favorite from:', fullUrl);
+
         // Format 1: Use URL parameter (RESTful approach)
-        response = await axiosAuth.delete(`${API_URL}/${numericMovieId}`, { headers });
+        response = await axios.delete(fullUrl, { headers });
         console.log('Format 1 succeeded (URL parameter)');
       } catch (error1) {
         console.log('First delete attempt failed:', error1.message);
 
         try {
           // Format 2: Use query parameter
-          response = await axiosAuth.delete(`${API_URL}?movieId=${numericMovieId}`, { headers });
+          const fullUrl = `https://movie-backend-4-qrw2.onrender.com/api/favorites?movieId=${numericMovieId}`;
+          response = await axios.delete(fullUrl, { headers });
           console.log('Format 2 succeeded (query parameter)');
         } catch (error2) {
           console.log('Second delete attempt failed:', error2.message);
 
           try {
             // Format 3: Send movieId in request body
-            response = await axiosAuth.delete(`${API_URL}`, {
+            const fullUrl = 'https://movie-backend-4-qrw2.onrender.com/api/favorites';
+            response = await axios.delete(fullUrl, {
               headers,
               data: { movieId: numericMovieId }
             });
@@ -272,7 +293,8 @@ export const favoriteService = {
             console.log('Third delete attempt failed:', error3.message);
 
             // Format 4: Last resort - try with POST method and _method=DELETE
-            response = await axiosAuth.post(`${API_URL}/remove`, {
+            const fullUrl = 'https://movie-backend-4-qrw2.onrender.com/api/favorites/remove';
+            response = await axios.post(fullUrl, {
               movieId: numericMovieId
             }, { headers });
             console.log('Format 4 succeeded (POST with /remove endpoint)');

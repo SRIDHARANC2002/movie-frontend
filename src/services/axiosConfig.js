@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create an axios instance with default config
 export const axiosAuth = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || '',
+  baseURL: 'https://movie-backend-4-qrw2.onrender.com',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json'
@@ -14,11 +14,11 @@ axiosAuth.interceptors.request.use(
   (config) => {
     // Try sessionStorage first, then fall back to localStorage
     const token = sessionStorage.getItem('token') || localStorage.getItem('token');
-    
+
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
-    
+
     return config;
   },
   (error) => {
@@ -36,7 +36,7 @@ axiosAuth.interceptors.response.use(
       // The request was made and the server responded with a status code
       // that falls out of the range of 2xx
       console.error('Response error:', error.response.status, error.response.data);
-      
+
       // Handle 401 Unauthorized errors
       if (error.response.status === 401) {
         console.log('Unauthorized access, redirecting to login...');
@@ -45,7 +45,7 @@ axiosAuth.interceptors.response.use(
         sessionStorage.removeItem('user');
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        
+
         // Redirect to login page if not already there
         if (!window.location.pathname.includes('/login')) {
           window.location.href = '/login';
@@ -58,7 +58,7 @@ axiosAuth.interceptors.response.use(
       // Something happened in setting up the request that triggered an Error
       console.error('Request error:', error.message);
     }
-    
+
     return Promise.reject(error);
   }
 );

@@ -123,13 +123,11 @@ let devWebSocket = null;
 
 /**
  * Initialize the development WebSocket connection
- * Currently disabled to prevent connection errors
+ * Completely disabled to prevent connection errors
  */
 export function initDevWebSocket() {
-  // WebSocket functionality is disabled
-  console.log('WebSocket functionality is disabled');
-
-  // Return null instead of attempting to connect
+  // WebSocket functionality is completely disabled
+  // No console log to avoid any output
   return null;
 }
 
