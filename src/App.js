@@ -4,6 +4,7 @@ import Navbar from './components/Layout/JavaScript/Navbar';
 import RoutesConfig from './routes/RoutesConfig';
 // Removed unused import: import { login } from './store/Slices/auth';
 import { fetchFavorites } from './store/Slices/favorites';
+import { fetchWatchList } from './store/Slices/watchlist';
 import './App.css';
 
 function App() {
@@ -87,9 +88,34 @@ function App() {
                       });
                   });
                 });
+              // Also fetch watchlist in parallel
+              dispatch(fetchWatchList())
+                .unwrap()
+                .then((watchlist) => {
+                  console.log(`✅ Fetched ${watchlist.length} watchlist items from server`);
+                })
+                .catch((error) => {
+                  console.warn('⚠️ Error fetching watchlist from server:', error);
+
+                  // Try to load from localStorage as fallback
+                  try {
+                    const localWatchList = localStorage.getItem('watchList');
+                    if (localWatchList) {
+                      const watchlist = JSON.parse(localWatchList);
+                      // Update Redux store with watchlist from localStorage
+                      dispatch({
+                        type: 'watchList/fetchWatchList/fulfilled',
+                        payload: watchlist
+                      });
+                      console.log(`✅ Loaded ${watchlist.length} watchlist items from localStorage as fallback`);
+                    }
+                  } catch (localError) {
+                    console.warn('⚠️ Error loading watchlist from localStorage:', localError);
+                  }
+                });
             }, 1000); // Wait 1 second to ensure token is set
-          } catch (favError) {
-            console.warn('⚠️ Error dispatching fetchFavorites:', favError);
+          } catch (error) {
+            console.warn('⚠️ Error dispatching data fetching:', error);
           }
 
           return true; // Successfully restored auth state

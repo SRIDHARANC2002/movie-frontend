@@ -1,9 +1,8 @@
 import axios from 'axios';
 
-// Since the watchlist endpoint is not available, we'll use the favorites endpoint as a fallback
-// This allows users to still save movies even if the watchlist endpoint is not working
-const API_URL = 'https://movie-backend-4-qrw2.onrender.com/api/favorites';
-
+// Use the dedicated watchlist endpoint
+const API_URL = 'http://localhost:5005/api/watchlist';
+//const API_URL = "https://movie-backend-4-qrw2.onrender.com/api/watchlist";
 // Helper function to log error details
 const logErrorDetails = (error, action) => {
   console.error(`❌ Error ${action}:`, error);
@@ -29,25 +28,23 @@ export const watchListService = {
         return [];
       }
 
-      // Use the favorites endpoint as a fallback since the watchlist endpoint is not available
-      const fullUrl = 'https://movie-backend-4-qrw2.onrender.com/api/favorites';
-      console.log('🔄 Fetching watch list from favorites endpoint as fallback:', fullUrl);
+      // Use the dedicated watchlist endpoint
+      console.log('🔄 Fetching watch list from:', API_URL);
 
-      const response = await axios.get(fullUrl, {
+      const response = await axios.get(API_URL, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
 
-      // Handle both watchList and favorites response formats
+      // Handle different response formats
       if (response.data.watchList) {
+        // Our dedicated watchlist endpoint uses this format
         console.log(`✅ Fetched ${response.data.watchList.length} watch list items`);
         return response.data.watchList;
-      } else if (response.data.favorites) {
-        console.log(`✅ Fetched ${response.data.favorites.length} items from favorites as fallback`);
-        return response.data.favorites;
       } else if (Array.isArray(response.data)) {
+        // Some endpoints might return a direct array
         console.log(`✅ Fetched ${response.data.length} items (direct array)`);
         return response.data;
       } else {
@@ -102,12 +99,11 @@ export const watchListService = {
 
       // Based on the backend controller code, we need to send the movie data directly
       try {
-        // Use the favorites endpoint as a fallback since the watchlist endpoint is not available
-        const fullUrl = 'https://movie-backend-4-qrw2.onrender.com/api/favorites';
-        console.log('🔄 Sending request to favorites endpoint as fallback:', fullUrl);
+        // Use the dedicated watchlist endpoint
+        console.log('🔄 Sending request to watchlist endpoint:', API_URL);
 
         // Send movie object directly - this matches the backend expectation
-        response = await axios.post(fullUrl, movieData, { headers });
+        response = await axios.post(API_URL, movieData, { headers });
         console.log('✅ Movie added to watch list successfully');
       } catch (error) {
         console.error('❌ Error adding movie to watch list:', error.message);
@@ -116,9 +112,8 @@ export const watchListService = {
         try {
           console.log('🔄 Trying with minimal required fields...');
           // The backend requires at least id and title
-          // Use the favorites endpoint as a fallback
-          const fullUrl = 'https://movie-backend-4-qrw2.onrender.com/api/favorites';
-          response = await axios.post(fullUrl, {
+          // Try with minimal data using the dedicated watchlist endpoint
+          response = await axios.post(API_URL, {
             id: Number(movie.id),
             title: movie.title
           }, { headers });
@@ -146,12 +141,12 @@ export const watchListService = {
 
       console.log('✅ Movie added to watch list');
 
-      // Handle both watchList and favorites response formats
+      // Handle different response formats
       if (response.data.watchList) {
+        // Our dedicated watchlist endpoint uses this format
         return response.data.watchList;
-      } else if (response.data.favorites) {
-        return response.data.favorites;
       } else if (Array.isArray(response.data)) {
+        // Some endpoints might return a direct array
         return response.data;
       } else {
         // Return the movie data as fallback
@@ -217,11 +212,11 @@ export const watchListService = {
       // Try to update the server, but don't block the UI update if it fails
       let response;
       try {
-        // Use the favorites endpoint as a fallback since the watchlist endpoint is not available
-        const fullUrl = `https://movie-backend-4-qrw2.onrender.com/api/favorites/${numericMovieId}`;
-        console.log('🔄 Attempting to remove item from server (best effort):', fullUrl);
+        // Use the dedicated watchlist endpoint
+        const fullUrl = `${API_URL}/${numericMovieId}`;
+        console.log('🔄 Attempting to remove item from server:', fullUrl);
 
-        // Format 1: Use URL parameter with numeric ID (RESTful approach)
+        // Use URL parameter with numeric ID (RESTful approach)
         response = await axios.delete(fullUrl, { headers });
         console.log('✅ Movie removed from server successfully');
       } catch (error) {
@@ -235,6 +230,7 @@ export const watchListService = {
             data: {
               success: true,
               message: 'Movie removed from watch list (local only)',
+              watchList: [],
               favorites: []
             }
           };
@@ -247,6 +243,7 @@ export const watchListService = {
             data: {
               success: true,
               message: 'Movie removed from watch list (local only)',
+              watchList: [],
               favorites: []
             }
           };

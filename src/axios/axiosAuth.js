@@ -3,8 +3,8 @@ import axios from 'axios';
 import { store } from '../store/store';
 
 // API URL for authentication
-const AUTH_API_URL = 'https://movie-backend-4-qrw2.onrender.com/api/users';
-
+//const AUTH_API_URL = 'https://movie-backend-4-qrw2.onrender.com/api/users';
+const AUTH_API_URL = 'http://localhost:5000/api/users';
 const axiosAuth = axios.create();
 
 // Request interceptor

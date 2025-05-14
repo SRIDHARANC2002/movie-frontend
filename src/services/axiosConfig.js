@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create an axios instance with default config
 export const axiosAuth = axios.create({
-  baseURL: 'https://movie-backend-4-qrw2.onrender.com',
+  baseURL: 'http://localhost:5005',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json'
