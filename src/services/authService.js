@@ -1,6 +1,6 @@
 import axios from 'axios';
-const API_URL = "https://movie-server-1-3u79.onrender.com/api/users";
-//const API_URL = "https://movie-backend-4-qrw2.onrender.com/api/users";
+// const API_URL = "http://localhost:5005/api/users";
+const API_URL = "https://movie-backend-4-qrw2.onrender.com/api/users";
 // Removed unused variable: const BACKEND_URL = "https://movie-backend-4-qrw2.onrender.com";
 //const BACKEND_URL = "http://localhost:5005";
 //const API_URL = `${BACKEND_URL}/api/users`;

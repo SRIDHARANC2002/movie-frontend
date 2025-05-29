@@ -43,7 +43,7 @@ export default function Navbar() {
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
       <div className="container">
         <Link className="navbar-brand multicolor-text" to="/">
-          KOLLYWOOD INFO PORTAL
+           KOLLYWOOD INFO PORTAL
         </Link>
         <button
           className="navbar-toggler"
