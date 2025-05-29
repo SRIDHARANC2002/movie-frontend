@@ -72,7 +72,7 @@ export default function Home() {
         </video>
 
         <div className="header-content">
-          <h1 className="main-title">Tamil Movie</h1>
+          <h1 className="main-title">KOLLYWOOD INFO PORTAL</h1>
           <p className="subtitle">
             Discover the best of Tamil cinema. Explore now.
           </p>
