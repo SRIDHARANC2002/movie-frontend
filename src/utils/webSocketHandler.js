@@ -6,18 +6,12 @@
 
 class WebSocketHandler {
   constructor(url, options = {}) {
-    // If WebSocket functionality is disabled, don't attempt to connect
-    const isWebSocketDisabled = true; // Always disabled since we're not using WebSocket
-    
     this.url = url;
     this.options = {
       reconnectInterval: 2000,
-      maxReconnectAttempts: 0, // Never attempt to reconnect
-      suppressErrors: true, // Always suppress connection errors
-      isDisabled: isWebSocketDisabled,
+      maxReconnectAttempts: 5,
       ...options
     };
-    
     this.reconnectAttempts = 0;
     this.socket = null;
     this.isConnected = false;
@@ -33,49 +27,33 @@ class WebSocketHandler {
    * Connect to the WebSocket server
    */
   connect() {
-    // If WebSocket is disabled, don't attempt to connect
-    if (this.options.isDisabled) {
-      return;
-    }
-
     try {
-      // Only attempt to connect if we don't have an active connection
-      if (!this.socket || this.socket.readyState === WebSocket.CLOSED) {
-        this.socket = new WebSocket(this.url);
+      this.socket = new WebSocket(this.url);
 
-        this.socket.onopen = (event) => {
-          if (!this.options.suppressErrors) {
-            console.log(`WebSocket connected to ${this.url}`);
-          }
-          this.isConnected = true;
-          this.reconnectAttempts = 0;
-          this.connectionHandlers.onOpen.forEach(handler => handler(event));
-        };
+      this.socket.onopen = (event) => {
+        console.log(`WebSocket connected to ${this.url}`);
+        this.isConnected = true;
+        this.reconnectAttempts = 0;
+        this.connectionHandlers.onOpen.forEach(handler => handler(event));
+      };
 
-        this.socket.onmessage = (event) => {
-          this.messageHandlers.forEach(handler => handler(event.data));
-        };
+      this.socket.onmessage = (event) => {
+        this.messageHandlers.forEach(handler => handler(event.data));
+      };
 
-        this.socket.onclose = (event) => {
-          if (!this.options.suppressErrors) {
-            console.log(`WebSocket connection closed: ${event.code} ${event.reason}`);
-          }
-          this.isConnected = false;
-          this.connectionHandlers.onClose.forEach(handler => handler(event));
-          // Don't attempt to reconnect since maxReconnectAttempts is 0
-        };
+      this.socket.onclose = (event) => {
+        console.log(`WebSocket connection closed: ${event.code} ${event.reason}`);
+        this.isConnected = false;
+        this.connectionHandlers.onClose.forEach(handler => handler(event));
+        this.attemptReconnect();
+      };
 
-        this.socket.onerror = (error) => {
-          if (!this.options.suppressErrors) {
-            console.log('WebSocket error occurred');
-          }
-          this.connectionHandlers.onError.forEach(handler => handler(error));
-        };
-      }
+      this.socket.onerror = (error) => {
+        console.log('WebSocket error occurred');
+        this.connectionHandlers.onError.forEach(handler => handler(error));
+      };
     } catch (error) {
-      if (!this.options.suppressErrors) {
-        console.log('Error creating WebSocket connection:', error);
-      }
+      console.log('Error creating WebSocket connection:', error);
     }
   }
 

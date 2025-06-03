@@ -11,28 +11,23 @@ const originalConsoleLog = console.log;
 // Create a hidden debug object to store errors for developer access if needed
 window._debugErrors = window._debugErrors || [];
 
-// Override console.error to suppress network and WebSocket errors
+// Override console.error to completely suppress all network and WebSocket errors
 console.error = function(...args) {
-  // Check if the error is related to WebSocket connection
+  // Always suppress errors for specific URLs
   if (args.some(arg => {
-    if (typeof arg === 'undefined' || arg === null) return false;
-    const argStr = arg instanceof Error ? arg.toString() : String(arg);
+    if (typeof arg !== 'string') return false;
     return (
-      argStr.includes('WebSocket') ||
-      argStr.includes('ws://') ||
-      argStr.includes('wss://') ||
-      argStr.includes('POST') ||
-      argStr.includes('GET') ||
-      argStr.includes('Failed to connect') ||
-      argStr.includes('connection failed') ||
-      argStr.includes('Connection closed')
+      arg.includes('https://movie-backend-4-qrw2.onrender.com/api/favorites') ||
+      arg.includes('DELETE') ||
+      arg.includes('POST') ||
+      arg.includes('GET')
     );
   })) {
     // Store the error for debugging purposes
     window._debugErrors.push({
-      type: 'websocket-error',
+      type: 'network-error',
       timestamp: new Date().toISOString(),
-      args: args.map(arg => arg instanceof Error ? arg.toString() : String(arg))
+      args: args.map(arg => arg instanceof Error ? arg.toString() : arg)
     });
     return; // Completely suppress these errors
   }
