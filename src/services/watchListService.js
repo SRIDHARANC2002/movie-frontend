@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Since the watchlist endpoint is not available, we'll use the favorites endpoint as a fallback
 // This allows users to still save movies even if the watchlist endpoint is not working
-const API_URL = 'https://movie-backend-4-qrw2.onrender.com/api/favorites';
+const API_URL = 'https://movie-backend-4-qrw2.onrender.com/api/watchlist';
 
 // Helper function to log error details
 const logErrorDetails = (error, action) => {
