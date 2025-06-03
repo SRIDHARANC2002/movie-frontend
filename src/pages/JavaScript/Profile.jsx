@@ -443,7 +443,7 @@ export default function Profile() {
       if (result.message && result.message.includes('local only')) {
         successMessage = 'Profile updated successfully! (Changes stored locally)';
       } else {
-        successMessage = 'Profile updated successfully! Your details have been saved to the database.';
+        successMessage = 'Profile updated successfully!';
       }
 
       setSaveStatus({
