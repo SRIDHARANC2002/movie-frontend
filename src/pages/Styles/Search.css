@@ -1,6 +1,6 @@
 /* Search Page Global Styles */
 .search-page {
-  background-color: #1971f6;
+  background-color: #f0f2f5;
   min-height: 100vh;
   padding: 40px 0;
   display: flex;
@@ -29,8 +29,8 @@
 .search-form {
   display: flex;
   align-items: center;
-  background-color: #fa0303;
-  border: 2px solid #4ff807;
+  background-color: #ffffff;
+  border: 2px solid #e9ecef;
   transition: all 0.3s ease;
   border-radius: 40px;
   overflow: hidden;
@@ -39,8 +39,8 @@
 }
 
 .search-form:focus-within {
-  border-color: #f5e903;
-  box-shadow: 0 0 0 3px rgba(105, 245, 4, 0.2);
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
 }
 
 .search-input {
@@ -64,7 +64,7 @@
 }
 
 .search-button {
-  background-color: #f4056c;
+  background-color: #007bff;
   color: white;
   border: none;
   padding: 10px 15px;
